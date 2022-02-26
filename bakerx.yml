@@ -1,0 +1,13 @@
+name: M1
+image: focal
+ip: 192.168.56.15
+sync: true
+up: |                      
+  apt apt-get update
+  # 😬
+  curl -sL https://deb.nodesource.com/setup_14.x -o nodesource_setup.sh | sudo bash
+  sudo apt install nodejs npm -y
+  groupadd -r ubuntu && useradd -m -r -g ubuntu ubuntu -s /bin/bash
+  echo 'ubuntu ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+  echo 'ubuntu:ubuntu' | chpasswd
+  ssh-keygen -t rsa -b 4096 -C "web-srv" -f web-srv -N ""
