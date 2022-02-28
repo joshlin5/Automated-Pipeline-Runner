@@ -10,4 +10,7 @@ up: |
   groupadd -r ubuntu && useradd -m -r -g ubuntu ubuntu -s /bin/bash
   echo 'ubuntu ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
   echo 'ubuntu:ubuntu' | chpasswd
-  ssh-keygen -t rsa -b 4096 -C "web-srv" -f web-srv -N ""
+  ssh-keygen -t rsa -b 4096 -C "config-srv" -f config-srv -N ""
+  sudo chown vagrant:vagrant config-srv
+  cat config-srv.pub >> .ssh/authorized_keys
+  cp config-srv /bakerx/.ssh

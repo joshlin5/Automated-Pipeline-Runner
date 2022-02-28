@@ -1,0 +1,15 @@
+setup: 
+  - CMD, VARIBLE, PACKAGE NAME, or DATA
+  - {package: mysql, version: 8.0}
+  - apt-get install mysql -y
+  - java11, nodejs, wget
+  - URL=https://github.ncsu.edu/engr-csc326-staff/iTrust2-v10
+  - ...
+
+jobs:
+  - name: build-itrust
+    steps: 
+      - name: ls
+        command: ls
+      - name: Install nodejs
+        apt: pkg='nodejs' state='present'
