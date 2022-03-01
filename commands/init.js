@@ -1,9 +1,10 @@
 const chalk = require('chalk');
 const path = require('path');
 const child = require('child_process');
-const execProvider = require('../lib/exec/execProvider')
+const execProvider = require('../lib/exec/execProvider');
+const builder = require('../lib/builder');
 
-exports.command = 'init';
+exports.command = 'init <vm_name>';
 exports.desc = 'Prepare tool';
 exports.builder = yargs => {
     yargs.options({
@@ -12,8 +13,11 @@ exports.builder = yargs => {
 
 
 exports.handler = async argv => {
-    const { processor } = argv;
+    const { vm_name, processor } = argv;
     console.log(chalk.green("Preparing computing environment..."));
+    if( processor === "Arm64" ) {
+        return await builder.initializeVirtualMachine(vm_name, "ubuntu:focal");
+    }
     listVM = "vboxmanage list vms"
     execProvider.exec(listVM).then(result =>{
         // check if the name "M1" is used by any VM
