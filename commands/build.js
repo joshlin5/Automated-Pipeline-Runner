@@ -1,3 +1,4 @@
+require('dotenv').config()
 const chalk = require('chalk');
 const fs   = require('fs');
 const path = require('path');
@@ -24,5 +25,12 @@ exports.handler = async argv => {
     const { processor } = argv;
     console.log(chalk.green("triggering a build job"));
     // console.log(doc.jobs[0].steps);
-    sshExec('ls', sshConfig);
+    let mysql_pssw = new Map();
+    mysql_pssw.set("{mysql_pssw}", process.env["mysql_pssw"])
+    for(let i in doc.setup){
+        let task = doc.setup[i];
+        console.log(chalk.green(task.name));
+        await sshExec(task.cmd, sshConfig, mysql_pssw)
+    }
+
 };

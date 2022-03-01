@@ -1,10 +1,17 @@
 setup: 
-  - CMD, VARIBLE, PACKAGE NAME, or DATA
-  - {package: mysql, version: 8.0}
-  - apt-get install mysql -y
-  - java11, nodejs, wget
-  - URL=https://github.ncsu.edu/engr-csc326-staff/iTrust2-v10
-  - ...
+  - name: update apt-get
+    cmd: sudo apt-get update
+  - name: install java 11
+    cmd: sudo apt-get install -y openjdk-11-jdk 
+  - name: install mysql 8
+    cmd: sudo apt-get install -y mysql-server
+  - name: install maven
+    cmd: sudo apt-get install -y maven
+  - name: setting muysql password
+    cmd: |
+        sudo mysql 
+        ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '{mysql_pssw}'
+        exit
 
 jobs:
   - name: build-itrust
