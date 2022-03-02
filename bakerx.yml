@@ -1,6 +1,6 @@
 name: M1
 image: focal
-ip: 192.168.56.15
+ip: 192.168.67.1
 sync: true
 up: |                      
   apt apt-get update
