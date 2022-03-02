@@ -15,4 +15,4 @@
 
 
 ## GitHub Project Screenshot
-![GitHub Project Screenshot](https://github.ncsu.edu/CSC-DevOps-S22/DEVOPS-17/tree/main/resources)
+![GitHub Project Screenshot](/resources/Checkpoint%20Github%20Project%20Screenshot.png)
