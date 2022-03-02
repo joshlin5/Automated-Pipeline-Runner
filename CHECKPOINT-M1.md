@@ -12,3 +12,7 @@
 ## TASKS PENDING
 - Automating Pipeline build for Intel Processor
 - Automating Pipeline build for Arm64 Processor
+
+
+## GitHub Project Screenshot
+![GitHub Project Screenshot](https://github.ncsu.edu/CSC-DevOps-S22/DEVOPS-17/tree/main/resources)
