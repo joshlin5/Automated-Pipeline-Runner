@@ -8,10 +8,10 @@ setup:
   - name: install maven
     cmd: sudo apt-get install -y maven
   # - name: setting muysql password
-  #   cmd: |
-  #       sudo mysql 
+  #   cmd: | 
+  #       "sudo mysql 
   #       ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '{mysql_pssw}'
-  #       exit
+  #       exit"
 
 jobs:
   - name: build-itrust

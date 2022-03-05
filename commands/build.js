@@ -2,8 +2,9 @@ require('dotenv').config()
 const chalk = require('chalk');
 const fs   = require('fs');
 const path = require('path');
-const sshExec = require('../lib/exec/ssh')
 const yaml = require('js-yaml');
+const bakerxProvider = require('../lib/bakerxProvider');
+const vmProvider = require("../lib/vmProvider");
 const buildFile = path.join( path.dirname(require.main.filename), 'build.yml')
 const doc = yaml.load(fs.readFileSync(buildFile, 'utf8'));
 const sshConfig = {
@@ -24,13 +25,14 @@ exports.builder = yargs => {
 exports.handler = async argv => {
     const { processor } = argv;
     console.log(chalk.green("triggering a build job"));
+    let provider = processor == "Intel/Amd64" ? bakerxProvider : vmProvider;
     // console.log(doc.jobs[0].steps);
     let mysql_pssw = new Map();
     mysql_pssw.set("{mysql_pssw}", process.env["mysql_pssw"])
     for(let i in doc.setup){
         let task = doc.setup[i];
         console.log(chalk.green(task.name));
-        await sshExec(task.cmd, sshConfig, mysql_pssw)
+        await provider.ssh(task.cmd, sshConfig, mysql_pssw)
     }
 
 };
