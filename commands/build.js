@@ -2,14 +2,21 @@ require('dotenv').config()
 const chalk = require('chalk');
 const fs   = require('fs');
 const path = require('path');
-const sshExec = require('../lib/exec/ssh')
 const yaml = require('js-yaml');
+const vmProvider = require("../lib/vmProvider");
+const bakerxProvider = require("../lib/bakerxProvider");
 const buildFile = path.join( path.dirname(require.main.filename), 'build.yml')
 const doc = yaml.load(fs.readFileSync(buildFile, 'utf8'));
-const sshConfig = {
+const intelSshConfig = {
     host: '127.0.0.1',
     port: 2005,
     user: 'vagrant',
+    identifyFile: path.join( path.dirname(require.main.filename), '.ssh', 'config-srv')
+};
+const vmSshConfig = {
+    host: null,
+    port: 22,
+    user: 'ubuntu',
     identifyFile: path.join( path.dirname(require.main.filename), '.ssh', 'config-srv')
 };
 
@@ -24,13 +31,23 @@ exports.builder = yargs => {
 exports.handler = async argv => {
     const { processor } = argv;
     console.log(chalk.green("triggering a build job"));
-    // console.log(doc.jobs[0].steps);
+    let config = null;
+    let provider = null;
+    if(processor == "Intel/Amd64"){
+        provider = bakerxProvider
+        config = intelSshConfig;
+    }else{
+        provider = vmProvider
+        vmSshConfig['host'] = await provider.getHost();
+        config = vmSshConfig;
+    }
     let mysql_pssw = new Map();
-    mysql_pssw.set("{mysql_pssw}", process.env["mysql_pssw"])
+    mysql_pssw.set("{mysql_pssw}", process.env["mysql_pssw"]);
+
     for(let i in doc.setup){
         let task = doc.setup[i];
         console.log(chalk.green(task.name));
-        await sshExec(task.cmd, sshConfig, mysql_pssw)
+        await provider.ssh(task.cmd, config, mysql_pssw);
     }
 
 };
