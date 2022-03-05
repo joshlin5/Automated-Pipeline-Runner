@@ -15,14 +15,10 @@ setup:
 
 jobs:
   - name: build-itrust
-    steps: 
-      - name: ls
-        command: ls
-      - name: Install nodejs
-        apt: pkg='nodejs' state='present'
+    steps:
       - name: Copy application.yml.template
         run: wget https://github.ncsu.edu/engr-csc326-staff/iTrust2-v10/blob/main/iTrust2/src/main/resources/application.yml.template
       - name: Rename to application.yml
         run: cp application.yml.template application.yml
-        - name: step name
+      - name: Run iTrust2
         run: cd iTrust2 && mvn --batch-mode --update-snapshots clean test
