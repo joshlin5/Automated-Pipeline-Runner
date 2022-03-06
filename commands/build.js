@@ -14,10 +14,10 @@ const intelSshConfig = {
     identifyFile: path.join( path.dirname(require.main.filename), '.ssh', 'config-srv')
 };
 const vmSshConfig = {
-    host: '192.168.67.23',
+    host: null,
     port: 22,
     user: 'ubuntu',
-    identifyFile: path.join( path.dirname(require.main.filename), 'keys', 'slim_rsa')
+    identifyFile: path.join( path.dirname(require.main.filename), '.ssh', 'config-srv')
 };
 
 exports.command = 'build';
@@ -39,12 +39,12 @@ exports.handler = async argv => {
         config = vmSshConfig;
     }
     let mysql_pssw = new Map();
-    mysql_pssw.set("{mysql_pssw}", process.env["mysql_pssw"])
+    mysql_pssw.set("{mysql_pssw}", process.env["mysql_pssw"]);
 
     for(let i in doc.setup){
         let task = doc.setup[i];
         console.log(chalk.green(task.name));
-        await sshExec(task.cmd, config, mysql_pssw)
+        await sshExec(task.cmd, config, mysql_pssw);
     }
 
 };
