@@ -7,10 +7,7 @@ up: |
   # 😬
   curl -sL https://deb.nodesource.com/setup_14.x -o nodesource_setup.sh | sudo bash
   sudo apt install nodejs npm -y
-  groupadd -r ubuntu && useradd -m -r -g ubuntu ubuntu -s /bin/bash
-  echo 'ubuntu ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
-  echo 'ubuntu:ubuntu' | chpasswd
   ssh-keygen -t rsa -b 4096 -C "config-srv" -f config-srv -N ""
   sudo chown vagrant:vagrant config-srv
   cat config-srv.pub >> .ssh/authorized_keys
-  cp config-srv /bakerx/.ssh
+  sudo cp config-srv /bakerx/.ssh

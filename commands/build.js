@@ -3,8 +3,8 @@ const chalk = require('chalk');
 const fs   = require('fs');
 const path = require('path');
 const yaml = require('js-yaml');
-const sshExec = require('../lib/exec/ssh')
 const vmProvider = require("../lib/vmProvider");
+const bakerxProvider = require("../lib/bakerxProvider");
 const buildFile = path.join( path.dirname(require.main.filename), 'build.yml')
 const doc = yaml.load(fs.readFileSync(buildFile, 'utf8'));
 const intelSshConfig = {
@@ -32,10 +32,13 @@ exports.handler = async argv => {
     const { processor } = argv;
     console.log(chalk.green("triggering a build job"));
     let config = null;
+    let provider = null;
     if(processor == "Intel/Amd64"){
+        provider = bakerxProvider
         config = intelSshConfig;
     }else{
-        vmSshConfig['host'] = await vmProvider.getHost();
+        provider = vmProvider
+        vmSshConfig['host'] = await provider.getHost();
         config = vmSshConfig;
     }
     let mysql_pssw = new Map();
@@ -44,7 +47,7 @@ exports.handler = async argv => {
     for(let i in doc.setup){
         let task = doc.setup[i];
         console.log(chalk.green(task.name));
-        await sshExec(task.cmd, config, mysql_pssw);
+        await provider.ssh(task.cmd, config, mysql_pssw);
     }
 
 };

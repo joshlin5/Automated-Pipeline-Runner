@@ -16,6 +16,7 @@ exports.handler = async argv => {
     const {processor } = argv;
     console.log(chalk.green("Preparing computing environment..."));
     let provider = processor == "Intel/Amd64" ? bakerxProvider : vmProvider;
+    await provider.exec('rm -rf ./.ssh');
     await provider.exec('mkdir -p ./.ssh');
     await provider.delete("M1")
     await provider.run();
