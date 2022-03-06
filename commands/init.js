@@ -1,4 +1,5 @@
 require('dotenv').config()
+const chalk = require('chalk');
 const bakerxProvider = require('../lib/bakerxProvider');
 const vmProvider = require("../lib/vmProvider");
 
