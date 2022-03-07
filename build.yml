@@ -7,6 +7,8 @@ setup:
     cmd: sudo apt-get install -y mysql-server
   - name: install maven
     cmd: sudo apt-get install -y maven
+  - name: install git
+    cmd: sudo apt-get install -y git
   - name: create mysql init file
     cmd: |
       "echo 'ALTER USER '\''root'\''@'\''localhost'\'' IDENTIFIED BY '\''{MYSWL_PSSW}'\'';' >> mysql-pwd"
@@ -24,10 +26,10 @@ jobs:
   - name: itrust-build
     steps:
       - name: Copy application.yml.template
-        run: git clone https://github.ncsu.edu/engr-csc326-staff/iTrust2-v10.git
+        cmd: git clone https://github.ncsu.edu/engr-csc326-staff/iTrust2-v10.git
       - name: Rename to application.yml
-        run: cp iTrust2-v10/blob/main/iTrust2/src/main/resources/application.yml.template iTrust2-v10/blob/main/iTrust2/src/main/resources/application.yml
+        cmd: cp iTrust2-v10/blob/main/iTrust2/src/main/resources/application.yml.template iTrust2-v10/blob/main/iTrust2/src/main/resources/application.yml
       - name: Add SQL password
-        run: sed 's/password:/password: {MYSQL_PSSW}/' iTrust2-v10/blob/main/iTrust2/src/main/resources/application.yml
+        cmd: sed 's/password:/password:\s{MYSQL_PSSW}/' iTrust2-v10/blob/main/iTrust2/src/main/resources/application.yml
       - name: Run iTrust2
-        run: cd iTrust2-v10 && mvn --batch-mode --update-snapshots clean test
+        cmd: cd iTrust2-v10 && mvn --batch-mode --update-snapshots clean test

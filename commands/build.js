@@ -8,7 +8,7 @@ const bakerxProvider = require("../lib/bakerxProvider");
 const buildFile = path.join( path.dirname(require.main.filename), 'build.yml')
 const doc = yaml.load(fs.readFileSync(buildFile, 'utf8'));
 
-exports.command = 'build';
+exports.command = 'build <job_name> <path of build.yml>';
 exports.desc = 'Trigger a build job, running steps outlined by build.yml, wait for output, and print build log.';
 exports.builder = yargs => {
     yargs.options({
@@ -17,10 +17,9 @@ exports.builder = yargs => {
 
 
 exports.handler = async argv => {
-    const { processor } = argv;
+    const { job_name, build_yml, processor } = argv;
     
     console.log(chalk.green("triggering a build job"));
-    let config = null;
     let provider = null;
     let vm_name = 'M1'
     if(processor == "Intel/Amd64"){
@@ -37,6 +36,16 @@ exports.handler = async argv => {
         let task = doc.setup[i];
         console.log(chalk.green(task.name));
         await provider.ssh(task.cmd, sshCmd, mysql_pssw);
+    }
+
+    for(let i in doc.jobs){
+        if (doc.jobs[i].name === job_name){
+            let steps = doc.jobs[i].steps
+            for (let j in steps){
+                console.log( chalk.green(steps[j].name) )
+                await provider.ssh(steps[j].run, sshCmd, mysql_pssw);
+            }
+        }
     }
 
 };
