@@ -13,11 +13,12 @@ exports.builder = yargs => {
 
 
 exports.handler = async argv => {
-    const {processor } = argv;
+    const { processor } = argv;
+    const vm_name = 'M1';
     console.log(chalk.green("Preparing computing environment..."));
-    let provider = processor == "Intel/Amd64" ? bakerxProvider : vmProvider;
-    await provider.exec('rm -rf ./.ssh');
-    await provider.exec('mkdir -p ./.ssh');
-    await provider.delete("M1")
+    let provider = processor == "Arm64" ? vmProvider : bakerxProvider;
+    // await provider.exec('rm -rf ./.ssh');
+    // await provider.exec('mkdir -p ./.ssh');
+    await provider.delete(vm_name);
     await provider.run();
 };

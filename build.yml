@@ -19,11 +19,17 @@ setup:
   - name: remove password file
     cmd: |
       "sudo rm ~/mysql-pwd"
+  - name: get ansible repo
+    cmd: sudo add-apt-repository ppa:ansible/ansible
+  - name: install ansible
+    cmd: sudo apt-get install ansible -y
 
 jobs:
   - name: build-itrust
-    steps: 
-      - name: ls
-        command: ls
-      - name: Install nodejs
-        apt: pkg='nodejs' state='present'
+    steps:
+      - name: Copy application.yml.template
+        run: wget https://github.ncsu.edu/engr-csc326-staff/iTrust2-v10/blob/main/iTrust2/src/main/resources/application.yml.template
+      - name: Rename to application.yml
+        run: cp application.yml.template application.yml
+      - name: Run iTrust2
+        run: cd iTrust2 && mvn --batch-mode --update-snapshots clean test
