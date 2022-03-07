@@ -19,10 +19,13 @@ setup:
   - name: remove password file
     cmd: |
       "sudo rm ~/mysql-pwd"
+<<<<<<< HEAD
   - name: get ansible repo
     cmd: sudo add-apt-repository ppa:ansible/ansible
   - name: install ansible
     cmd: sudo apt-get install ansible -y
+=======
+>>>>>>> main
 
 jobs:
   - name: build-itrust
