@@ -19,13 +19,15 @@ setup:
   - name: remove password file
     cmd: |
       "sudo rm ~/mysql-pwd"
-      
+
 jobs:
-  - name: build-itrust
+  - name: itrust-build
     steps:
       - name: Copy application.yml.template
-        run: wget https://github.ncsu.edu/engr-csc326-staff/iTrust2-v10/blob/main/iTrust2/src/main/resources/application.yml.template
+        run: git clone https://github.ncsu.edu/engr-csc326-staff/iTrust2-v10.git
       - name: Rename to application.yml
-        run: cp application.yml.template application.yml
+        run: cp iTrust2-v10/blob/main/iTrust2/src/main/resources/application.yml.template iTrust2-v10/blob/main/iTrust2/src/main/resources/application.yml
+      - name: Add SQL password
+        run: sed 's/password:\s/linux/' iTrust2-v10/blob/main/iTrust2/src/main/resources/application.yml
       - name: Run iTrust2
-        run: cd iTrust2 && mvn --batch-mode --update-snapshots clean test
+        run: cd iTrust2-v10 && mvn --batch-mode --update-snapshots clean test
