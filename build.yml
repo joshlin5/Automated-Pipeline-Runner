@@ -9,7 +9,7 @@ setup:
     cmd: sudo apt-get install -y maven
   - name: create mysql init file
     cmd: |
-      "echo 'ALTER USER '\''root'\''@'\''localhost'\'' IDENTIFIED BY '\''{mysql_pssw}'\'';' >> mysql-pwd"
+      "echo 'ALTER USER '\''root'\''@'\''localhost'\'' IDENTIFIED BY '\''{MYSWL_PSSW}'\'';' >> mysql-pwd"
   - name: studown mysql
     cmd: sudo service mysql stop
   - name: initialize mysql password
