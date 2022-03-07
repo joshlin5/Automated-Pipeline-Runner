@@ -9,7 +9,7 @@ setup:
     cmd: sudo apt-get install -y maven
   - name: create mysql init file
     cmd: |
-      "echo 'ALTER USER '\''root'\''@'\''localhost'\'' IDENTIFIED BY '\''{mysql_pssw}'\'';' >> mysql-pwd"
+      "echo 'ALTER USER '\''root'\''@'\''localhost'\'' IDENTIFIED BY '\''{MYSWL_PSSW}'\'';' >> mysql-pwd"
   - name: studown mysql
     cmd: sudo service mysql stop
   - name: initialize mysql password
@@ -28,6 +28,6 @@ jobs:
       - name: Rename to application.yml
         run: cp iTrust2-v10/blob/main/iTrust2/src/main/resources/application.yml.template iTrust2-v10/blob/main/iTrust2/src/main/resources/application.yml
       - name: Add SQL password
-        run: sed 's/password:/password: ${MYSQL_PSSW}/' iTrust2-v10/blob/main/iTrust2/src/main/resources/application.yml
+        run: sed 's/password:/password: {MYSQL_PSSW}/' iTrust2-v10/blob/main/iTrust2/src/main/resources/application.yml
       - name: Run iTrust2
         run: cd iTrust2-v10 && mvn --batch-mode --update-snapshots clean test
