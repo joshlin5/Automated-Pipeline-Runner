@@ -30,8 +30,8 @@ exports.handler = async argv => {
         sshCmd = `ssh ${vm_name}`
     }
     let mysql_pssw = new Map();
-    mysql_pssw.set("{mysql_pssw}", process.env["mysql_pssw"]);
-    mysql_pssw.set("{mysql_user}", process.env["mysql_user"]);
+    mysql_pssw.set("{MYSQL_PSSW}", process.env["MYSQL_PSSW"]);
+    mysql_pssw.set("{MYSQL_USER}", process.env["MYSQL_USER"]);
 
     for(let i in doc.setup){
         let task = doc.setup[i];
