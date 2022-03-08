@@ -26,8 +26,8 @@ jobs:
       - name: Rename to application.yml
         cmd: mv iTrust2-v10/iTrust2/src/main/resources/application.yml.template iTrust2-v10/iTrust2/src/main/resources/application.yml
       - name: Add SQL username
-        cmd: sed 's/username:/username:\s{MYSQL_USER}/'  iTrust2-v10/iTrust2/src/main/resources/application.yml
+        cmd: sed -i 's/username:\ root/username:\ {MYSQL_USER}/'  iTrust2-v10/iTrust2/src/main/resources/application.yml
       - name: Add SQL password
-        cmd: sed 's/password:/password:$\s{MYSQL_PSSW}/' iTrust2-v10/iTrust2/src/main/resources/application.yml
+        cmd: sed -i 's/password:/password:\ {MYSQL_PSSW}/' iTrust2-v10/iTrust2/src/main/resources/application.yml
       - name: Run iTrust2
-        cmd: cd iTrust2-v10 && mvn --batch-mode --update-snapshots clean test
+        cmd: cd iTrust2-v10/iTrust2 && mvn --batch-mode --update-snapshots clean test
