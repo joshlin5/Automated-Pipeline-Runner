@@ -11,19 +11,9 @@ setup:
     cmd: sudo apt-get install -y maven
   - name: install git
     cmd: sudo apt-get install -y git
-  - name: create mysql init file
+  - name: create user mysql
     cmd: |
-      "echo 'ALTER USER '\''root'\''@'\''localhost'\'' IDENTIFIED BY '\''${MYSWL_PSSW}'\'';' >> mysql-pwd"
-  - name: studown mysql
-    cmd: sudo service mysql stop
-  - name: initialize mysql password
-    cmd: |
-      sudo mysqld --init-file=~/mysql-pwd
-  - name: restart mysql
-    cmd: sudo service mysql start
-  - name: remove password file
-    cmd: |
-      "sudo rm ~/mysql-pwd"
+      "sudo mysql -e \"CREATE USER '{mysql_user}'@'localhost' IDENTIFIED WITH mysql_native_password BY '{mysql_pssw}';\""
 
 jobs:
   - name: itrust-build

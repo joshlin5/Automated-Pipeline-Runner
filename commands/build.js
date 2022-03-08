@@ -31,6 +31,7 @@ exports.handler = async argv => {
     }
     let mysql_pssw = new Map();
     mysql_pssw.set("{mysql_pssw}", process.env["mysql_pssw"]);
+    mysql_pssw.set("{mysql_user}", process.env["mysql_user"]);
 
     for(let i in doc.setup){
         let task = doc.setup[i];
