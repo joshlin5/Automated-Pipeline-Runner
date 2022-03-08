@@ -13,7 +13,7 @@ setup:
     cmd: sudo apt-get install -y git
   - name: reset user in mysql
     cmd: |
-      "sudo mysql -e \"DROP USER '{MYSQL_USER}'@'localhost' ;\""
+      "sudo mysql -e \"DROP USER IF EXISTS '{MYSQL_USER}'@'localhost' ;\""
   - name: create a new user in mysql
     cmd: |
       "sudo mysql -e \"CREATE USER '{MYSQL_USER}'@'localhost' IDENTIFIED WITH mysql_native_password BY '{MYSQL_PSSW}';\""
@@ -22,7 +22,7 @@ jobs:
   - name: itrust-build
     steps:
       - name: Copy application.yml.template
-        cmd: git clone https://${GIT_USER}:${TOKEN}@github.ncsu.edu/engr-csc326-staff/iTrust2-v10.git
+        cmd: git clone https://{GIT_USER}:{TOKEN}@github.ncsu.edu/engr-csc326-staff/iTrust2-v10.git
       - name: Rename to application.yml
         cmd: mv iTrust2-v10/iTrust2/src/main/resources/application.yml.template iTrust2-v10/iTrust2/src/main/resources/application.yml
       - name: Add SQL username
