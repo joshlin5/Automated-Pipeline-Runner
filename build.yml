@@ -13,7 +13,7 @@ setup:
     cmd: sudo apt-get install -y git
   - name: create mysql init file
     cmd: |
-      "echo 'ALTER USER '\''root'\''@'\''localhost'\'' IDENTIFIED BY '\''{MYSWL_PSSW}'\'';' >> mysql-pwd"
+      "echo 'ALTER USER '\''root'\''@'\''localhost'\'' IDENTIFIED BY '\''${MYSWL_PSSW}'\'';' >> mysql-pwd"
   - name: studown mysql
     cmd: sudo service mysql stop
   - name: initialize mysql password
@@ -29,10 +29,10 @@ jobs:
   - name: itrust-build
     steps:
       - name: Copy application.yml.template
-        cmd: git clone https://github.ncsu.edu/engr-csc326-staff/iTrust2-v10.git
+        cmd: git clone https://${GIT_USER}:${TOKEN}@github.ncsu.edu/engr-csc326-staff/iTrust2-v10.git
       - name: Rename to application.yml
-        cmd: cp iTrust2-v10/blob/main/iTrust2/src/main/resources/application.yml.template iTrust2-v10/blob/main/iTrust2/src/main/resources/application.yml
+        cmd: mv iTrust2-v10/iTrust2/src/main/resources/application.yml.template iTrust2-v10/iTrust2/src/main/resources/application.yml
       - name: Add SQL password
-        cmd: sed 's/password:/password:\s{MYSQL_PSSW}/' iTrust2-v10/blob/main/iTrust2/src/main/resources/application.yml
+        cmd: sed 's/password:/password:${MYSQL_PSSW}/' iTrust2-v10/iTrust2/src/main/resources/application.yml
       - name: Run iTrust2
         cmd: cd iTrust2-v10 && mvn --batch-mode --update-snapshots clean test
