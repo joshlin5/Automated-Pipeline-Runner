@@ -3,8 +3,6 @@ setup:
     cmd: sudo apt-get update
   - name: update apt
     cmd: sudo apt update
-  - name: install git
-    cmd: sudo apt-get install -y git-all
   - name: install java 11
     cmd: sudo apt install -y openjdk-11-jdk 
   - name: install mysql 8
