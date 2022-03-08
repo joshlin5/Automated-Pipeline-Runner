@@ -1,8 +1,12 @@
 setup: 
   - name: update apt-get
     cmd: sudo apt-get update
+  - name: update apt
+    cmd: sudo apt update
+  - name: install git
+    cmd: sudo apt-get install -y git-all
   - name: install java 11
-    cmd: sudo apt-get install -y openjdk-11-jdk 
+    cmd: sudo apt install -y openjdk-11-jdk 
   - name: install mysql 8
     cmd: sudo apt-get install -y mysql-server
   - name: install maven
@@ -15,7 +19,8 @@ setup:
   - name: studown mysql
     cmd: sudo service mysql stop
   - name: initialize mysql password
-    cmd: sudo mysqld --init-file=~/mysql-pwd
+    cmd: |
+      sudo mysqld --init-file=~/mysql-pwd
   - name: restart mysql
     cmd: sudo service mysql start
   - name: remove password file

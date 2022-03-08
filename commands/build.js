@@ -7,7 +7,6 @@ const vmProvider = require("../lib/vmProvider");
 const bakerxProvider = require("../lib/bakerxProvider");
 const buildFile = path.join( path.dirname(require.main.filename), 'build.yml')
 const doc = yaml.load(fs.readFileSync(buildFile, 'utf8'));
-
 exports.command = 'build <job_name> <path of build.yml>';
 exports.desc = 'Trigger a build job, running steps outlined by build.yml, wait for output, and print build log.';
 exports.builder = yargs => {
@@ -22,9 +21,10 @@ exports.handler = async argv => {
     console.log(chalk.green("triggering a build job"));
     let provider = null;
     let vm_name = 'M1'
+    let sshCmd = '';
     if(processor == "Intel/Amd64"){
         provider = bakerxProvider
-        sshCmd = provider.sshConfig(vm_name)
+        sshCmd = await provider.sshConfig(vm_name)
     }else{
         provider = vmProvider
         sshCmd = `ssh ${vm_name}`
