@@ -43,7 +43,7 @@ exports.handler = async argv => {
             let steps = doc.jobs[i].steps
             for (let j in steps){
                 console.log( chalk.green(steps[j].name) )
-                await provider.ssh(steps[j].run, sshCmd, mysql_pssw);
+                await provider.ssh(steps[j].cmd, sshCmd, mysql_pssw);
             }
         }
     }
