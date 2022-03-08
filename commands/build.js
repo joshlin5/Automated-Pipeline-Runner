@@ -22,9 +22,10 @@ exports.handler = async argv => {
     let config = null;
     let provider = null;
     let vm_name = 'M1'
+    let sshCmd = '';
     if(processor == "Intel/Amd64"){
         provider = bakerxProvider
-        sshCmd = provider.sshConfig(vm_name)
+        sshCmd = await provider.sshConfig(vm_name)
     }else{
         provider = vmProvider
         sshCmd = `ssh ${vm_name}`
