@@ -28,6 +28,6 @@ jobs:
       - name: Add SQL username
         cmd: sed -i 's/username:\ root/username:\ {MYSQL_USER}/'  iTrust2-v10/iTrust2/src/main/resources/application.yml
       - name: Add SQL password
-        cmd: sed 's/password:/password:\ ${MYSQL_PSSW}/' iTrust2-v10/iTrust2/src/main/resources/application.yml
+        cmd: sed 's/password:/password:\ {MYSQL_PSSW}/' iTrust2-v10/iTrust2/src/main/resources/application.yml
       - name: Run iTrust2
         cmd: cd iTrust2-v10/iTrust2 && mvn --batch-mode --update-snapshots clean test
