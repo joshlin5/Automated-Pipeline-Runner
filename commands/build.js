@@ -29,14 +29,16 @@ exports.handler = async argv => {
         provider = vmProvider
         sshCmd = `ssh ${vm_name}`
     }
-    let mysql_pssw = new Map();
-    mysql_pssw.set("{mysql_pssw}", process.env["mysql_pssw"]);
-    mysql_pssw.set("{mysql_user}", process.env["mysql_user"]);
+    let envParams = new Map();
+    envParams.set("{MYSQL_PSSW}", process.env["MYSQL_PSSW"]);
+    envParams.set("{MYSQL_USER}", process.env["MYSQL_USER"]);
+    envParams.set("{GIT_USER}", process.env["GIT_USER"]);
+    envParams.set("{TOKEN}", process.env["TOKEN"]);
 
     for(let i in doc.setup){
         let task = doc.setup[i];
         console.log(chalk.green(task.name));
-        await provider.ssh(task.cmd, sshCmd, mysql_pssw);
+        await provider.ssh(task.cmd, sshCmd, envParams);
     }
 
     for(let i in doc.jobs){
@@ -44,7 +46,7 @@ exports.handler = async argv => {
             let steps = doc.jobs[i].steps
             for (let j in steps){
                 console.log( chalk.green(steps[j].name) )
-                await provider.ssh(steps[j].cmd, sshCmd, mysql_pssw);
+                await provider.ssh(steps[j].cmd, sshCmd, envParams);
             }
         }
     }
