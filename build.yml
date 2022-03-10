@@ -1,8 +1,8 @@
 setup: 
+  - name: remove flash-kernel
+    cmd: "'sudo apt-get remove -y flash-kernel && sudo apt-get -y autoremove'"
   - name: update apt-get
     cmd: sudo apt-get update
-  - name: update apt
-    cmd: sudo apt update
   - name: install java 11
     cmd: sudo apt-get install -y openjdk-11-jdk 
   - name: install mysql 8
@@ -11,26 +11,18 @@ setup:
     cmd: sudo apt-get install -y maven
   - name: install git
     cmd: sudo apt-get install -y git
-  - name: reset user in mysql
+  - name: set new password for root user in mysql
     cmd: |
-      "sudo mysql -e \"DROP USER IF EXISTS '{MYSQL_USER}'@'localhost' ;\""
-  - name: create a new user in mysql
-    cmd: |
-      "sudo mysql -e \"CREATE USER '{MYSQL_USER}'@'localhost' IDENTIFIED WITH mysql_native_password BY '{MYSQL_PSSW}';\""
-  - name: grant privileges for the new user
-    cmd: |
-      "sudo mysql -e \"GRANT ALL PRIVILEGES ON *.* TO '{MYSQL_USER}'@'localhost';\""
+      "mysqladmin -uroot -p{MYSQL_PSSW} ping | grep -c 'mysqld is alive' || sudo mysql -e \"ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '{MYSQL_PSSW}';\""
 
 jobs:
   - name: itrust-build
     steps:
-      - name: Copy application.yml.template
-        cmd: git clone https://{GIT_USER}:{TOKEN}@github.ncsu.edu/engr-csc326-staff/iTrust2-v10.git
-      - name: Rename to application.yml
+      - name: clone latest version of iTrust2
+        cmd: "'rm -rf iTrust2-v10 && git clone https://{GIT_USER}:{TOKEN}@github.ncsu.edu/engr-csc326-staff/iTrust2-v10.git'"
+      - name: copy  application.yml.template to application.yml
         cmd: cp iTrust2-v10/iTrust2/src/main/resources/application.yml.template iTrust2-v10/iTrust2/src/main/resources/application.yml
-      - name: Add SQL username
-        cmd: sed -i 's/username:\ root/username:\ {MYSQL_USER}/'  iTrust2-v10/iTrust2/src/main/resources/application.yml
-      - name: Add SQL password
+      - name: update password in application.yml
         cmd: sed -i 's/password:/password:\ {MYSQL_PSSW}/' iTrust2-v10/iTrust2/src/main/resources/application.yml
       - name: Run iTrust2
         cmd: |
