@@ -1,19 +1,20 @@
 setup: 
+  - name: update apt
+    cmd: sudo apt update
   - name: remove flash-kernel
-    cmd: "'sudo apt-get remove -y flash-kernel && sudo apt-get -y autoremove'"
-  - name: update apt-get
-    cmd: sudo apt-get update
+    cmd: "'sudo apt remove -y flash-kernel && sudo apt -y autoremove'"
   - name: install java 11
-    cmd: sudo apt-get install -y openjdk-11-jdk 
+    cmd:  sudo apt install -y openjdk-11-jre-headless -qq
   - name: install mysql 8
-    cmd: sudo apt-get install -y mysql-server
+    cmd: sudo apt install -y mysql-server -qq
   - name: install maven
-    cmd: sudo apt-get install -y maven
+    cmd: sudo apt install -y maven
   - name: install git
-    cmd: sudo apt-get install -y git
+    cmd: sudo apt install -y git
   - name: set new password for root user in mysql
     cmd: |
-      "mysqladmin -uroot -p{MYSQL_PSSW} ping | grep -c 'mysqld is alive' || sudo mysql -e \"ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '{MYSQL_PSSW}';\""
+      "mysqladmin -uroot -p{MYSQL_PSSW} ping | grep -c 'mysqld is alive' || 
+      sudo mysql -e \"ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '{MYSQL_PSSW}';\""
 
 jobs:
   - name: itrust-build
@@ -26,4 +27,6 @@ jobs:
         cmd: sed -i 's/password:/password:\ {MYSQL_PSSW}/' iTrust2-v10/iTrust2/src/main/resources/application.yml
       - name: Run iTrust2
         cmd: |
-          "cd iTrust2-v10/iTrust2 && mvn --batch-mode --update-snapshots clean test"
+          "cd iTrust2-v10/iTrust2 && mvn --batch-mode --update-snapshots clean test > ~/shared/cwd/iTrust.log"
+      - name: cleanup
+        cmd: rm -rf iTrust2-v10
