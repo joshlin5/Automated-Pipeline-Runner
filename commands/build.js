@@ -31,7 +31,6 @@ exports.handler = async argv => {
     }
     let envParams = new Map();
     envParams.set("{MYSQL_PSSW}", process.env["MYSQL_PSSW"]);
-    envParams.set("{MYSQL_USER}", process.env["MYSQL_USER"]);
     envParams.set("{GIT_USER}", process.env["GIT_USER"]);
     envParams.set("{TOKEN}", process.env["TOKEN"]);
 
