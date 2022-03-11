@@ -4,5 +4,6 @@ node_modules/
 .ssh
 package-lock.json
 *.txt
+*.log
 config-srv
 config-srv.pub
