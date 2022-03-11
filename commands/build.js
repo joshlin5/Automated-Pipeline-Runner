@@ -5,7 +5,6 @@ const path = require('path');
 const yaml = require('js-yaml');
 const vmProvider = require("../lib/vmProvider");
 const bakerxProvider = require("../lib/bakerxProvider");
-const buildFile = path.join( path.dirname(require.main.filename), 'build.yml')
 exports.command = 'build <job_name> <buildFile_path>';
 exports.desc = 'Trigger a build job, running steps outlined by build.yml, wait for output, and print build log.';
 exports.builder = yargs => {
@@ -39,22 +38,35 @@ exports.handler = async argv => {
     for(let i in doc.setup){
         let task = doc.setup[i];
         console.log(chalk.green(task.name));
-        await provider.ssh(task.cmd, sshCmd, envParams);
+        await provider.ssh(task.cmd, sshCmd, envParams)
     }
 
-    for(let i in doc.jobs){
-        if (doc.jobs[i].name === job_name){
-            let steps = doc.jobs[i].steps
-            for (let j in steps){
-                console.log( chalk.green(steps[j].name) );
-                await provider.ssh(steps[j].cmd, sshCmd, envParams);
-            }
-            console.log( chalk.green("CLEAN UP PROCESS") );
-            let cleanup_steps = doc.jobs[i].cleanup
-            for (let j in cleanup_steps){
-                console.log( chalk.green(cleanup_steps[j].name) );
-                await provider.ssh(cleanup_steps[j].cmd, sshCmd, envParams);
-            } 
+    console.log( chalk.yellow( "\nINSTALLATION COMPLETE! TRIGGERING JOB EXECUTION" ))
+
+    function cleanUp(cleanup_steps) {
+        for (let step in cleanup_steps){
+            console.log( chalk.green(cleanup_steps[step].name) );
+            provider.ssh(cleanup_steps[step].cmd, sshCmd, envParams);
         }
+    }
+
+    for(let job in doc.jobs){
+        let steps = []
+        let cleanup_steps = []
+        if (doc.jobs[job].name === job_name){
+            steps = doc.jobs[job].steps;
+            cleanup_steps = doc.jobs[job].cleanup;
+        }
+
+        for (let step in steps){
+            console.log( chalk.green(steps[step].name) );
+            await provider.ssh(steps[step].cmd, sshCmd, envParams).catch( (error) => {
+                console.log( chalk.yellow("\n\nCLEAN UP ON ERROR") );
+                cleanUp(cleanup_steps);
+                throw error
+            });
+        }
+        console.log( chalk.yellow("\n\nCLEAN UP ON SUCCESS") );
+        cleanUp(cleanup_steps);
     }
 };
