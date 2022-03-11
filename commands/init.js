@@ -17,8 +17,6 @@ exports.handler = async argv => {
     const vm_name = 'M1';
     console.log(chalk.green("Preparing computing environment..."));
     let provider = processor == "Arm64" ? vmProvider : bakerxProvider;
-    // await provider.exec('rm -rf ./.ssh');
-    // await provider.exec('mkdir -p ./.ssh');
     await provider.delete(vm_name);
     await provider.run();
 };

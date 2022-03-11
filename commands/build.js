@@ -46,10 +46,15 @@ exports.handler = async argv => {
         if (doc.jobs[i].name === job_name){
             let steps = doc.jobs[i].steps
             for (let j in steps){
-                console.log( chalk.green(steps[j].name) )
+                console.log( chalk.green(steps[j].name) );
                 await provider.ssh(steps[j].cmd, sshCmd, envParams);
             }
+            console.log( chalk.green("CLEAN UP PROCESS") );
+            let cleanup_steps = doc.jobs[i].cleanup
+            for (let j in cleanup_steps){
+                console.log( chalk.green(cleanup_steps[j].name) );
+                await provider.ssh(cleanup_steps[j].cmd, sshCmd, envParams);
+            } 
         }
     }
-
 };

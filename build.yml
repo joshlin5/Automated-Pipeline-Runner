@@ -8,9 +8,9 @@ setup:
   - name: install mysql 8
     cmd: sudo apt install -y mysql-server -qq
   - name: install maven
-    cmd: sudo apt install -y maven
+    cmd: sudo apt install -y maven -qq
   - name: install git
-    cmd: sudo apt install -y git
+    cmd: sudo apt install -y git -qq
   - name: set new password for root user in mysql
     cmd: |
       "mysqladmin -uroot -p{MYSQL_PSSW} ping | grep -c 'mysqld is alive' || 
@@ -27,6 +27,7 @@ jobs:
         cmd: sed -i 's/password:/password:\ {MYSQL_PSSW}/' iTrust2-v10/iTrust2/src/main/resources/application.yml
       - name: Run iTrust2
         cmd: |
-          "cd iTrust2-v10/iTrust2 && mvn --batch-mode --update-snapshots clean test > ~/shared/cwd/iTrust.log"
-      - name: cleanup
+          "cd iTrust2-v10/iTrust2 && mvn --batch-mode --update-snapshots clean test"
+    cleanup:
+      - name: remove iTrust2-v10 repo
         cmd: rm -rf iTrust2-v10
