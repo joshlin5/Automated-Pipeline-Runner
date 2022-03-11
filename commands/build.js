@@ -41,7 +41,7 @@ exports.handler = async argv => {
         await provider.ssh(task.cmd, sshCmd, envParams)
     }
 
-    console.log( chalk.yellow( "\nINSTALLATION COMPLETE! TRIGGERING JOB EXECUTION" ))
+    console.log( chalk.yellowBright( "\nINSTALLATION COMPLETE! TRIGGERING JOB EXECUTION" ))
 
     function cleanUp(cleanup_steps) {
         for (let step in cleanup_steps){
@@ -61,12 +61,12 @@ exports.handler = async argv => {
         for (let step in steps){
             console.log( chalk.green(steps[step].name) );
             await provider.ssh(steps[step].cmd, sshCmd, envParams).catch( (error) => {
-                console.log( chalk.yellow("\n\nCLEAN UP ON ERROR") );
+                console.log( chalk.yellowBright("\n\nCLEAN UP ON ERROR") );
                 cleanUp(cleanup_steps);
                 throw error
             });
         }
-        console.log( chalk.yellow("\n\nCLEAN UP ON SUCCESS") );
+        console.log( chalk.yellowBright("\n\nCLEAN UP ON SUCCESS") );
         cleanUp(cleanup_steps);
     }
 };
