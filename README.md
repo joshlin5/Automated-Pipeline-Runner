@@ -12,6 +12,19 @@
 ** VM name is set as `M1`
 ** New User created for MySQL is `admin`
 
+## Structure of .env file
+In the .env file, we need to set up the following valirables to run the building jobs:
+```
+# the password of the 'root' user for mysql 
+MYSQL_PSSW='' 
+
+# your git account for cloning project from https://github.ncsu.edu/
+GIT_USER=''
+
+# the token of the git account your provide
+TOKEN=''
+```
+
 ## Process Involved in Setting Up the Pipeline
 - Used the learning from Class and Homework assignments on:
   - child_process.exec to execute shell commands.
@@ -47,6 +60,10 @@
   - **Solution**: used a new user for which the password can be changed as number of times as required.
 - Default buffer size of child_process is 200KB whereas output `mvn test` command was almost 1.2 MB. So, entire stdout could not be displayed.
   - **Solution**: explicitly updated the max buffer size of child_process to 1.3 MB. 
+
+## Screencast
+### Screencast for Intel
+### Screencast for M1
 
 ## [Checkpoint Report](https://github.ncsu.edu/CSC-DevOps-S22/DEVOPS-17/blob/main/CHECKPOINT-M1.md)
 This checkpoint report includes the tasks we have completed along with the team contributions, the issues we have faced while implementing or completing tasks, and what work remains after this checkpoint. There will also be a screenshot of the Github Project at the time this Checkpoint document was created.
