@@ -6,26 +6,27 @@
 - run `npm install` and `npm link`
 - use env template to create .env `cp env.template .env`
 - update the values for MYSQL Password, GitHub Username, GitHub Token.
-- for Intel/AMD64 users, checking if you remain `4G memory` for the virtual machine.
-- initiate the pipeline `pipeline init`
-- build the pipeline `pipeline build itrust-build <path to build.yml>`
+- for Intel/AMD64 users, checking if you have at least `4G memory` for the virtual machine.
+- initiate the pipeline `pipeline init` or `node index.js init`
+- build the pipeline `pipeline build <job-name> <path to build.yml>` or `node index.js build <job-name> <path to build.yml>`
 
 ** VM name is set as `M1`
 ** New User created for MySQL is `admin`
+** [job-name] for running iTrust2 is itrust-build
 
 ## Description for `.env` file
-In the .env file, we need to set up the following valirables to run the building jobs:
+In the .env file, we need to set up the following variables to run the building jobs:
 ```
 MYSQL_PSSW='' 
 GIT_USER=''
 TOKEN=''
 ```
-- MYSQL_PSSW: the password of the 'root' user for mysql
+- MYSQL_PSSW: the password of the 'admin' user for mysql
 - GIT_USER: a git account that can access the project on https://github.ncsu.edu/.
-- TOKEN: the token of the git account your provide
+- TOKEN: the token created by your git account
 
 ## Process Involved in Setting Up the Pipeline
-- Used the learning from Class and Homework assignments on:
+- Used the learning from class and homework assignments on:
   - child_process.exec to execute shell commands.
   - start VM using `bakerx` and `basicvm`.
 - extract ip, user, ssh key path of the VM using:
@@ -36,7 +37,7 @@ TOKEN=''
   - installing java, mysql, maven, git.
   - setting password for mysql only when not already set
   - synchronize the system time of VM with time servers: to avoid broken packages during installations.
-- understanding the functioning of iTrust2
+- understanding the functionality of iTrust2
 - using github token to clone the private repo
 - `sed` and `awk` commands to replace keywords in a file
 - using .ssh/config file to ssh with a hostname
@@ -51,6 +52,9 @@ TOKEN=''
   ```
 - executing shell cmd on VM remotely from local machine by prepending the ssh cmd.
 
+## Machines that Developers have tested on:
+- macOS Monterey with a M1 processor
+- macOS Big Sur with an Intel processor
 
 ## Issues Encountered during the Process of Automation
 - Encountered broken package during installation occasionally due to system time drift. 
