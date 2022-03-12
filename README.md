@@ -1,16 +1,52 @@
 # Pipeline Project - DevOps-17
 
-## Instructions to Run This Project
+## Instructions to Run the Project
 - clone the repo `git clone https://github.ncsu.edu/CSC-DevOps-S22/DEVOPS-17.git`
-- `cd DEVOPS-17`
+- change the directory `cd DEVOPS-17`
 - run `npm install` and `npm link`
-- start virtual machine using command:
-  - FOR INTEL PROCESSOR: `pipeline init`
-  - FOR ARM64 PROCESSOR: `pipeline init <vm name>`
-- pipeline build implementation is still in progress
+- use env template to create .env `cp env.template .env`
+- update the values for MYSQL Password, GitHub Username, GitHub Token.
+- initiate the pipeline `pipeline init`
+- build the pipeline `pipeline build itrust-build <path to build.yml>`
 
-** If the vm name provided in case of ARM processor is already used, stop the VM with that name or use another name.
+** VM name is set as `M1`
+** New User created for MySQL is `admin`
 
+## Process Involved in Setting Up the Pipeline
+- Used the learning from Class and Homework assignments on:
+  - child_process.exec to execute shell commands.
+  - start VM using `bakerx` and `basicvm`.
+- extract ip, user, ssh key path of the VM using:
+  - `bakerx ssh-info <VM-NAME>`
+  - `vm ssh-config <VM-NAME>`
+- loading .env in node.js
+- defining steps in build.yml for installations and configurations:
+  - installing java, mysql, maven, git.
+  - setting password for mysql only when not already set
+  - synchronize the system time of VM with time servers: to avoid broken packages during installations.
+- understanding the functioning of iTrust2
+- using github token to clone the private repo
+- `sed` and `awk` commands to replace keywords in a file
+- using .ssh/config file to ssh with a hostname
+  - eg: `ssh M1` where config file is:
+  ```shell
+  Host M1
+      HostName 192.168.xx.xxx
+      User ubuntu
+      IdentityFile <path to ssh key>
+      StrictHostKeyChecking no
+      UserKnownHostsFile /dev/null
+  ```
+- executing shell cmd on VM remotely from local machine by prepending the ssh cmd.
+
+
+## Issues Encountered during the Process of Automation
+- Encountered broken package during installation occasionally due to system time drift. 
+  - **Solution**: used `sudo systemctl restart systemd-timesyncd.service` to explicitly sync the system time.
+- MySQL password set command failed on building the pipeline multiple times.
+  - **Solution**: used a new user for which the password can be changed as number of times as required.
+- Default buffer size of child_process is 200KB whereas output `mvn test` command was almost 1.9 MB. So, entire stdout could not be displayed.
+  - **Solution**: explicitly updated the max buffer size of child_process to 2 MB. 
 
 ## [Checkpoint Report](https://github.ncsu.edu/CSC-DevOps-S22/DEVOPS-17/blob/main/CHECKPOINT-M1.md)
 This checkpoint report includes the tasks we have completed along with the team contributions, the issues we have faced while implementing or completing tasks, and what work remains after this checkpoint. There will also be a screenshot of the Github Project at the time this Checkpoint document was created.
