@@ -13,7 +13,7 @@
 ** VM name is set as `M1`
 ** New User created for MySQL is `admin`
 
-## Structure of .env file
+## Description for `.env` file
 In the .env file, we need to set up the following valirables to run the building jobs:
 ```
 MYSQL_PSSW='' 
@@ -38,7 +38,7 @@ TOKEN=''
   - synchronize the system time of VM with time servers: to avoid broken packages during installations.
 - understanding the functioning of iTrust2
 - using github token to clone the private repo
-- `sed` and `awk` commands to replace keywords in a file
+- `sed` commands to replace keywords in a file
 - using .ssh/config file to ssh with a hostname
   - eg: `ssh M1` where config file is:
   ```shell
@@ -57,6 +57,8 @@ TOKEN=''
   - **Solution**: used `sudo systemctl restart systemd-timesyncd.service` to explicitly sync the system time.
 - MySQL password set command failed on building the pipeline multiple times.
   - **Solution**: used a new user for which the password can be changed as number of times as required.
+- The new MySQL user created for iTrust2 doesn't have privileges to manipulate MySQL.
+  - **Solution**: granted the new user with all privileges to the MySQL.
 - Default buffer size of child_process is 200KB whereas output `mvn test` command was almost 1.2 MB. So, entire stdout could not be displayed.
   - **Solution**: explicitly updated the max buffer size of child_process to 1.3 MB. 
 
