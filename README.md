@@ -6,6 +6,7 @@
 - run `npm install` and `npm link`
 - use env template to create .env `cp env.template .env`
 - update the values for MYSQL Password, GitHub Username, GitHub Token.
+- for Intel/AMD64 users, checking if you remain `4G memory` for the virtual machine.
 - initiate the pipeline `pipeline init`
 - build the pipeline `pipeline build itrust-build <path to build.yml>`
 
@@ -15,15 +16,13 @@
 ## Structure of .env file
 In the .env file, we need to set up the following valirables to run the building jobs:
 ```
-# the password of the 'root' user for mysql 
 MYSQL_PSSW='' 
-
-# your git account for cloning project from https://github.ncsu.edu/
 GIT_USER=''
-
-# the token of the git account your provide
 TOKEN=''
 ```
+- MYSQL_PSSW: the password of the 'root' user for mysql
+- GIT_USER: a git account that can access the project on https://github.ncsu.edu/.
+- TOKEN: the token of the git account your provide
 
 ## Process Involved in Setting Up the Pipeline
 - Used the learning from Class and Homework assignments on:
@@ -61,8 +60,9 @@ TOKEN=''
 - Default buffer size of child_process is 200KB whereas output `mvn test` command was almost 1.2 MB. So, entire stdout could not be displayed.
   - **Solution**: explicitly updated the max buffer size of child_process to 1.3 MB. 
 
-## Screencast
+## Demo Screencast
 ### Screencast for Intel
+[![Intel Demo](./static/Intel_demo.png)](https://drive.google.com/file/d/1RGOJzXG19odPBtmXrGc9IQB3BXlwUIaD/view?usp=sharing "Intel Demo")<br/>
 ### Screencast for M1
 
 ## [Checkpoint Report](https://github.ncsu.edu/CSC-DevOps-S22/DEVOPS-17/blob/main/CHECKPOINT-M1.md)
