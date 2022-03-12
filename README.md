@@ -11,8 +11,12 @@
 - build the pipeline `pipeline build <job-name> <path to build.yml>` or `node index.js build <job-name> <path to build.yml>`
 
 ** VM name is set as `M1`
+
 ** New User created for MySQL is `admin`
+
 ** [job-name] for running iTrust2 is itrust-build
+
+** VM information is stored at DEVOPS-17/config.txt after `init` is run
 
 ## Description for `.env` file
 In the .env file, we need to set up the following variables to run the building jobs:
