@@ -1,10 +1,5 @@
-name: M1
+name: M2
 image: focal
 ip: 192.168.56.15
 sync: true
 memory: 4096
-up: |                      
-  apt apt-get update
-  # 😬
-  curl -sL https://deb.nodesource.com/setup_14.x -o nodesource_setup.sh | sudo bash
-  sudo apt install nodejs npm -y
