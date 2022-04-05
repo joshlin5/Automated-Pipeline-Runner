@@ -20,7 +20,7 @@ exports.handler = async argv => {
     console.log(chalk.green(`Using the yml file: ${buildFile_path}`));
     let doc = yaml.load(fs.readFileSync(buildFile_path, 'utf8'));
     let provider = null;
-    let vm_name = 'M1'
+    let vm_name = 'M2'
     let sshCmd = '';
     if(processor == "Intel/Amd64"){
         provider = bakerxProvider
