@@ -111,3 +111,45 @@ function functionName( node )
 	}
 	return "anon function @" + node.loc.start.line;
 }
+
+// TODO 1: Conditional boundary mutations: > => >=, < => <=
+function conditionalBoundary(ast)
+{
+	
+}
+// TODO 2: Incremental mutations: ++j => j++, i++ => i--
+function incremental(ast)
+{
+	
+}
+// TODO 3: Negate conditionals: == => !=, > => <
+function negate(ast)
+{
+	
+}
+// TODO 4: Mutate control flow if => else if
+function controlFlow(ast)
+{
+	
+}
+// TODO 5: Conditional expression mutation && => ||, || => &&
+function conditionalExpression(ast)
+{
+	
+}
+// TODO 6: Clone return, early Find: return embeddedHtml;, copy and insert in random location of function (before declaration).
+function earlyClone(ast)
+{
+	
+}
+// TODO 7: Non-empty string: "" => "<div>Bug</div>".
+function nonEmptyString(ast)
+{
+	
+}
+
+// TODO 8: Constant Replacement: 0 => 3
+function constantReplacement(ast)
+{
+	
+}
