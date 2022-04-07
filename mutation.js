@@ -135,21 +135,42 @@ function controlFlow(ast)
 // TODO 5: Conditional expression mutation && => ||, || => &&
 function conditionalExpression(ast)
 {
-	
+	traverseWithParents(ast, (node) => {
+        if( node.type === "LogicalExpression") {
+            if (node.operator === "&&") {
+                node.operator === "||";
+            }
+            else if (node.operator === "||") {
+                node.operator === "&&";
+            }
+        }
+    })
 }
-// TODO 6: Clone return, early Find: return embeddedHtml;, copy and insert in random location of function (before declaration).
-function earlyClone(ast)
+// TODO 6: Clone return, early Find: "return embeddedHtml";, copy and insert in random location of function (before declaration).
+function cloneR(ast)
 {
-	
+	traverseWithParents(ast, (node) => {
+        if( node.type === "ReturnStatement" && node.name === "embeddedHtml") {
+            
+        }
+    })
 }
 // TODO 7: Non-empty string: "" => "<div>Bug</div>".
 function nonEmptyString(ast)
 {
-	
+	traverseWithParents(ast, (node) => {
+        if( node.type === "Literal" && node.raw === "") {
+            node.raw === "<div>Bug</div>";
+        }
+    })
 }
 
 // TODO 8: Constant Replacement: 0 => 3
 function constantReplacement(ast)
 {
-	
+	traverseWithParents(ast, (node) => {
+        if( node.type === "Literal" && node.value === "0") {
+            node.value === "3";
+        }
+    })
 }
