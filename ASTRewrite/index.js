@@ -190,13 +190,28 @@ function controlFlow(ast)
 // TODO 5: Conditional expression mutation && => ||, || => &&
 function conditionalExpression(ast)
 {
+    let candidates = 0;
+    traverseWithParents(ast, (node) => {
+        if( node.type === "LogicalExpression" && (node.operator === "&&" || node.operator === "||") ) {
+            candidates++;
+        }
+    })
+
+    let mutateTarget = getRandomInt(candidates);
+    let current = 0;
 	traverseWithParents(ast, (node) => {
         if( node.type === "LogicalExpression") {
             if (node.operator === "&&") {
-                node.operator === "||";
+                if( current === mutateTarget ) {
+                    node.operator === "||";
+                    console.log( chalk.red(`Replacing && with || on line ${node.loc.start.line}` ));
+                }
             }
             else if (node.operator === "||") {
-                node.operator === "&&";
+                if( current === mutateTarget ) {
+                    node.operator === "&&";
+                    console.log( chalk.red(`Replacing || with && on line ${node.loc.start.line}` ));
+                }
             }
         }
     })
@@ -213,9 +228,21 @@ function cloneR(ast)
 // TODO 7: Non-empty string: "" => "<div>Bug</div>".
 function nonEmptyString(ast)
 {
+    let candidates = 0;
+    traverseWithParents(ast, (node) => {
+        if( node.type === "Literal" && node.raw === "" ) {
+            candidates++;
+        }
+    })
+
+    let mutateTarget = getRandomInt(candidates);
+    let current = 0;
 	traverseWithParents(ast, (node) => {
         if( node.type === "Literal" && node.raw === "") {
-            node.raw === "<div>Bug</div>";
+            if( current === mutateTarget ) {
+                node.raw === "<div>Bug</div>";
+                console.log( chalk.red(`Replacing "" with "<div>Bug</div>" on line ${node.loc.start.line}` ));
+            }
         }
     })
 }
@@ -223,9 +250,21 @@ function nonEmptyString(ast)
 // TODO 8: Constant Replacement: 0 => 3
 function constantReplacement(ast)
 {
+    let candidates = 0;
+    traverseWithParents(ast, (node) => {
+        if( node.type === "Literal" && node.value === "0" ) {
+            candidates++;
+        }
+    })
+
+    let mutateTarget = getRandomInt(candidates);
+    let current = 0;
 	traverseWithParents(ast, (node) => {
         if( node.type === "Literal" && node.value === "0") {
-            node.value === "3";
+            if( current === mutateTarget ) {
+                node.value === "3";
+                console.log( chalk.red(`Replacing 0 with 3 on line ${node.loc.start.line}` ));
+            }
         }
     })
 }
