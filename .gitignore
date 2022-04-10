@@ -7,3 +7,4 @@ package-lock.json
 *.log
 config-srv
 config-srv.pub
+*.png
