@@ -5,7 +5,7 @@ const options = {tokens:true, tolerant: true, loc: true, range: true };
 const fs = require("fs");
 const chalk = require('chalk');
 
-let operations = [ NegateConditionals, conditionalBoundary, incremental, controlFlow ]
+let operations = [ NegateConditionals ]
 
 function rewrite( filepath, newPath ) {
 
@@ -18,6 +18,29 @@ function rewrite( filepath, newPath ) {
 
     let code = escodegen.generate(ast);
     fs.writeFileSync( newPath, code);
+}
+
+function NegateConditionals(ast) {
+
+    let candidates = 0;
+    traverseWithParents(ast, (node) => {
+        if( node.type === "BinaryExpression" && node.operator === ">" ) {
+            candidates++;
+        }
+    })
+
+    let mutateTarget = getRandomInt(candidates);
+    let current = 0;
+    traverseWithParents(ast, (node) => {
+        if( node.type === "BinaryExpression" && node.operator === ">" ) {
+            if( current === mutateTarget ) {
+                node.operator = "<"
+                console.log( chalk.red(`Replacing > with < on line ${node.loc.start.line}` ));
+            }
+            current++;
+        }
+    })
+
 }
 
 rewrite("/Users/cjparnin/classes/devops/checkbox.io-micro-preview/marqdown.js", 
@@ -92,95 +115,22 @@ function functionName( node )
 // TODO 1: Conditional boundary mutations: > => >=, < => <=
 function conditionalBoundary(ast)
 {
-	let candidates = 0
-    traverseWithParents(ast, (node) => {
-        if( node.type === "BinaryExpression" && (node.operator === ">" || node.operator === "<")) {
-            candidates++;
-        }
-    })
-
-    let mutateTarget = getRandomInt(candidates);
-    let current = 0;
-    traverseWithParents(ast, (node) => {
-        if( node.type === "BinaryExpression" ) {
-            if(node.operator === ">" && current === mutateTarget){
-                node.operator = ">="
-                console.log( chalk.red(`Replacing > with >= on line ${node.loc.start.line}` ));
-            }
-            if(node.operator === "<" && current === mutateTarget){
-                node.operator = "<="
-                console.log( chalk.red(`Replacing < with <= on line ${node.loc.start.line}` ));
-            }
-            current++;
-        }
-    })
+	
 }
 // TODO 2: Incremental mutations: ++j => j++, i++ => i--
 function incremental(ast)
 {
-	let candidates = 0;
-    traverseWithParents(ast, (node) => {
-        if( node.type === "UpdateExpression") {
-            candidates++;
-        }
-    })
-
-    let mutateTarget = getRandomInt(candidates);
-    let current = 0;
-    traverseWithParents(ast, (node) => {
-        if( node.type === "UpdateExpression" && current === mutateTarget) {
-            if(current == mutateTarget){
-                node.prefix = !node.prefix;
-            }
-            current++;
-        }
-    })
+	
 }
 // TODO 3: Negate conditionals: == => !=, > => <
-function NegateConditionals(ast) {
-
-    let candidates = 0;
-    traverseWithParents(ast, (node) => {
-        if( node.type === "BinaryExpression" && (node.operator === ">" || node.operator === "==")) {
-            candidates++;
-        }
-    })
-
-    let mutateTarget = getRandomInt(candidates);
-    let current = 0;
-    traverseWithParents(ast, (node) => {
-        if( node.type === "BinaryExpression" && (node.operator === ">" || node.operator === "==")) {
-            if( current === mutateTarget ) {
-                ori = node.operator;
-                node.operator = node.operator === ">" ? "<" : "!=";
-                console.log( chalk.red(`Replacing ${ori} with ${node.operator} on line ${node.loc.start.line}` ));
-            }
-            current++;
-        }
-    })
-
+function negate(ast)
+{
+	
 }
 // TODO 4: Mutate control flow if => else if
 function controlFlow(ast)
 {
-	let candidates = 0;
-    traverseWithParents(ast, (node) => {
-        if( node.type === "IfStatement" && node.operator === ">" ) {
-            candidates++;
-        }
-    })
-
-    let mutateTarget = getRandomInt(candidates);
-    let current = 0;
-    traverseWithParents(ast, (node) => {
-        if( node.type === "IfStatement" ) {
-            if( current === mutateTarget && node.alternate == null) {
-                node.alternate = true
-                console.log( chalk.red(`Replacing if with else if on line ${node.loc.start.line}` ));
-            }
-            current++;
-        }
-    })
+	
 }
 // TODO 5: Conditional expression mutation && => ||, || => &&
 function conditionalExpression(ast)
@@ -189,9 +139,11 @@ function conditionalExpression(ast)
         if( node.type === "LogicalExpression") {
             if (node.operator === "&&") {
                 node.operator === "||";
+                console.log( chalk.red(`Replacing && with || on line ${node.loc.start.line}` ));
             }
             else if (node.operator === "||") {
                 node.operator === "&&";
+                console.log( chalk.red(`Replacing || with && on line ${node.loc.start.line}` ));
             }
         }
     })
@@ -211,6 +163,7 @@ function nonEmptyString(ast)
 	traverseWithParents(ast, (node) => {
         if( node.type === "Literal" && node.raw === "") {
             node.raw === "<div>Bug</div>";
+            console.log( chalk.red(`Replacing "" with "<div>Bug</div>" on line ${node.loc.start.line}` ));
         }
     })
 }
@@ -221,6 +174,7 @@ function constantReplacement(ast)
 	traverseWithParents(ast, (node) => {
         if( node.type === "Literal" && node.value === "0") {
             node.value === "3";
+            console.log( chalk.red(`Replacing 0 with 3 on line ${node.loc.start.line}` ));
         }
     })
 }
