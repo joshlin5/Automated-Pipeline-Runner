@@ -5,7 +5,9 @@ const options = {tokens:true, tolerant: true, loc: true, range: true };
 const fs = require("fs");
 const chalk = require('chalk');
 
-let operations = [ NegateConditionals, conditionalBoundary, incremental, controlFlow ]
+// add cloneR when finished
+let operations = [ NegateConditionals, conditionalBoundary, incremental, 
+    controlFlow, conditionalExpression, nonEmptyString, constantReplacement ]
 
 exports.command = 'testharness <targetFile>';
 exports.desc = '';
@@ -28,7 +30,7 @@ function rewrite( filepath, newPath ) {
     var buf = fs.readFileSync(filepath, "utf8");
     var ast = esprima.parse(buf, options);    
 
-    let op = operations[0];
+    let op = operations[getRandomInt(7)];
     
     op(ast);
 
