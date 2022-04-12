@@ -36,6 +36,8 @@ function rewrite( filepath, newPath ) {
 
     let code = escodegen.generate(ast);
     fs.writeFileSync( newPath, code);
+    // TODO: Save mutated snapshot
+    // TODO: Compare mutated snapshot with original
 }
 
 
