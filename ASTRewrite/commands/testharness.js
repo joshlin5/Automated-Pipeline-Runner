@@ -1,5 +1,6 @@
 
 const esprima = require("esprima");
+const puppeteer = require('puppeteer');
 const escodegen = require("escodegen");
 const options = {tokens:true, tolerant: true, loc: true, range: true };
 const fs = require("fs");
@@ -8,20 +9,35 @@ const chalk = require('chalk');
 // add cloneR when finished
 let operations = [ NegateConditionals, conditionalBoundary, incremental, 
     controlFlow, conditionalExpression, nonEmptyString, constantReplacement ]
-
-exports.command = 'testharness <targetFile>';
+let targetUrls =[
+    'http://localhost:3000/survey/long.md',
+    'http://localhost:3000/survey/upload.md',
+    'http://localhost:3000/survey/survey.md',
+    'http://localhost:3000/survey/variations.md'
+]
+let regex = /http:\/\/localhost:3000\/survey\/(.*)\.md/
+exports.command = 'testharness <jsFile>';
 exports.desc = '';
 exports.builder = yargs => {
     yargs.options({
     });
 };
 exports.handler = async argv => {
-    const { targetFile, processor } = argv;
-    console.log(targetFile)
-    let fileRegex = /(.*)\.js$/
-    let fileName = fileRegex.exec(targetFile)[1];
-    let modFileName = fileName+'-mod.js';
-    rewrite(targetFile, modFileName)
+    const { jsFile, processor } = argv;
+    // console.log(jsFile)
+    // let fileRegex = /(.*)\.js$/
+    // let fileName = fileRegex.exec(jsFile)[1];
+    // let modFileName = fileName+'-mod.js';
+    // rewrite(jsFile, modFileName)
+
+    for(let i =0; i< 2 ;i++){
+        for(let j in targetUrls){
+            let url = targetUrls[j];
+            let filename = `${regex.exec(url)[1]}-${i}`;
+            // runServer();
+            await screenshot(url, filename)
+        }
+    }
 }
 
 
@@ -38,10 +54,25 @@ function rewrite( filepath, newPath ) {
     fs.writeFileSync( newPath, code);
 }
 
+function runServer(){
 
+}
 
-function screenshot(){
-    
+async function screenshot(url, filename){
+    const fn = `./${filename}.png`;
+    const browser = await puppeteer.launch({
+        args: ['--no-sandbox']
+    });
+    const page = await browser.newPage();
+    await page.goto(url, {
+    waitUntil: 'networkidle0'
+    });
+    await page.screenshot({
+        path: fn,
+        fullPage: true
+    });
+    await page.close();
+    await browser.close();
 }
 
 
