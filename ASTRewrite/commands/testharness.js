@@ -46,9 +46,12 @@ function rewrite( filepath, newPath ) {
     var buf = fs.readFileSync(filepath, "utf8");
     var ast = esprima.parse(buf, options);    
 
-    let op = operations[getRandomInt(7)];
-    
-    op(ast);
+    // Randomly picks a mutation to apply
+    var loop = getRandomInt(7);
+    for (x = 1; x <= 7; x++) {
+        let op = operations[getRandomInt(7)];
+        op(ast);
+    }
 
     let code = escodegen.generate(ast);
     fs.writeFileSync( newPath, code);
