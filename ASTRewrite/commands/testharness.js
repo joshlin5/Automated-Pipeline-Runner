@@ -5,7 +5,8 @@ const escodegen = require("escodegen");
 const options = {tokens:true, tolerant: true, loc: true, range: true };
 const fs = require("fs");
 const chalk = require('chalk');
-const execProvider = require('./execProvider')
+const execProvider = require('./execProvider');
+const { throws } = require("assert");
 // add cloneR when finished
 let operations = [ NegateConditionals, conditionalBoundary, incremental, 
     controlFlow, conditionalExpression, nonEmptyString, constantReplacement ]
@@ -16,7 +17,7 @@ let targetUrls =[
     'http://localhost:3000/survey/variations.md'
 ]
 let regex = /http:\/\/localhost:3000\/survey\/(.*)\.md/
-let microserviceDir = '../checkbox.io-micro-preview/'
+let microserviceDir = '~/checkbox.io-micro-preview/'
 exports.command = 'testharness <jsFile>';
 exports.desc = '';
 exports.builder = yargs => {
@@ -67,16 +68,22 @@ function rewrite( filepath, newPath ) {
 
 async function checkServerReady(url){
     const browser = await puppeteer.launch({
+        executablePath: '/usr/bin/chromium-browser',
         args: ['--no-sandbox']
     });
     const page = await browser.newPage();
+    let cnt = 0;
     while(true){
         try{
+            cnt++;
             await page.goto(url, {
                 waitUntil: 'networkidle0'
             });
             break;
         }catch(error){
+            if(cnt>1000){
+                throw error;
+            }
             await delay(500);
         }
     }
@@ -88,6 +95,7 @@ async function checkServerReady(url){
 async function screenshot(url, filename){
     const fn = `./${filename}.png`;
     const browser = await puppeteer.launch({
+        executablePath: '/usr/bin/chromium-browser',
         args: ['--no-sandbox']
     });
     const page = await browser.newPage();

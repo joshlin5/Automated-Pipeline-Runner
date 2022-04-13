@@ -14,9 +14,13 @@ setup:
   - name: install git
     cmd: sudo apt install -y git -qq
   - name: install node
-    cmd: sudo apt install nodejs npm -y -qq
+    cmd: sudo apt install -y nodejs npm -qq
+  - name: install uuid for pm2
+    cmd: sudo npm install uuid@latest -g
   - name: instal pm2
     cmd: sudo npm install pm2 -g
+  - name: install browser for puppteer
+    cmd: sudo apt install -y chromium-browser -qq
   - name: stop apt-daily timer to look for updates
     cmd: sudo systemctl stop apt-daily.timer
   - name: reset user in mysql
@@ -45,3 +49,22 @@ jobs:
     cleanup:
       - name: remove iTrust2-v10 repo
         cmd: rm -rf iTrust2-v10
+  - name: mutation-coverage
+    steps:
+      - name: clone the microservice
+        cmd: git clone https://github.com/chrisparnin/checkbox.io-micro-preview.git
+      - name: move Testharness to ~/
+        cmd: cp -r /bakerx/ASTRewrite ASTRewrite/
+      - name: install node dependencies for microservice
+        cmd: "'cd ~/checkbox.io-micro-preview && npm install'"
+      - name: install node dependencies for Testharness
+        cmd: "'cd ~/ASTRewrite && npm install'"
+      - name: start mutation test
+        cmd: "'node ASTRewrite/index.js testharness ~/checkbox.io-micro-preview/marqdown.js'"
+    cleanup:
+      - name: remove all web from pm2
+        cmd: pm2 kill
+      - name: remove ASTRewrite repo
+        cmd: rm -rf ASTRewrite
+      - name: remove microservice repo
+        cmd: rm -rf checkbox.io-micro-preview
