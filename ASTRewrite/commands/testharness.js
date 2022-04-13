@@ -5,7 +5,7 @@ const escodegen = require("escodegen");
 const options = {tokens:true, tolerant: true, loc: true, range: true };
 const fs = require("fs");
 const chalk = require('chalk');
-
+const execProvider = require('./execProvider')
 // add cloneR when finished
 let operations = [ NegateConditionals, conditionalBoundary, incremental, 
     controlFlow, conditionalExpression, nonEmptyString, constantReplacement ]
@@ -24,25 +24,35 @@ exports.builder = yargs => {
 };
 exports.handler = async argv => {
     const { jsFile, processor } = argv;
-    // console.log(jsFile)
-    // let fileRegex = /(.*)\.js$/
-    // let fileName = fileRegex.exec(jsFile)[1];
-    // let modFileName = fileName+'-mod.js';
-    // rewrite(jsFile, modFileName)
+    console.log(jsFile)
+    let fileRegex = /(.*)\.js$/
+    let fileName = fileRegex.exec(jsFile)[1];
+    // save the origin file for mutation
+    fs.copyFileSync(jsFile, `${fileName}_ori.js`)
+    // record the origin file name for recovery
+    let oriFile = fileName+'_ori.js';
 
-    for(let i =0; i< 2 ;i++){
+    await execProvider.exec("cd ../checkbox.io-micro-preview/ && pm2 start index.js");
+
+    for(let i =0; i< 1 ;i++){
         for(let j in targetUrls){
             let url = targetUrls[j];
-            let filename = `${regex.exec(url)[1]}-${i}`;
-            // runServer();
-            await screenshot(url, filename)
+            let picFileName = `${regex.exec(url)[1]}-${i}`;
+            rewrite(oriFile, jsFile)
+            await execProvider.exec("pm2 reload index");
+            await checkServerReady(url);
+            await screenshot(url, picFileName);
         }
     }
+
+    // recovery the file
+    fs.copyFileSync(oriFile, `${fileName}.js`)
+    await execProvider.exec("pm2 kill")
 }
 
 
 function rewrite( filepath, newPath ) {
-
+    console.log(filepath, newPath)
     var buf = fs.readFileSync(filepath, "utf8");
     var ast = esprima.parse(buf, options);    
 
@@ -52,11 +62,26 @@ function rewrite( filepath, newPath ) {
 
     let code = escodegen.generate(ast);
     fs.writeFileSync( newPath, code);
-    // TODO: Save mutated snapshot
-    // TODO: Compare mutated snapshot with original
 }
 
-function runServer(){
+async function checkServerReady(url){
+    const browser = await puppeteer.launch({
+        args: ['--no-sandbox']
+    });
+    const page = await browser.newPage();
+    while(true){
+        try{
+            await page.goto(url, {
+                waitUntil: 'networkidle0'
+            });
+            break;
+        }catch(error){
+            await delay(500);
+        }
+    }
+    console.log("test");
+    await page.close();
+    await browser.close();
 
 }
 
@@ -67,7 +92,7 @@ async function screenshot(url, filename){
     });
     const page = await browser.newPage();
     await page.goto(url, {
-    waitUntil: 'networkidle0'
+        waitUntil: 'networkidle0'
     });
     await page.screenshot({
         path: fn,
@@ -78,7 +103,9 @@ async function screenshot(url, filename){
 }
 
 
-
+function delay(time) {
+    return new Promise(resolve => setTimeout(resolve, time));
+}
 
 
 

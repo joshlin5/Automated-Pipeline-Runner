@@ -13,6 +13,10 @@ setup:
     cmd: sudo apt install -y maven -qq
   - name: install git
     cmd: sudo apt install -y git -qq
+  - name: install node
+    cmd: sudo apt install nodejs npm -y -qq
+  - name: instal pm2
+    cmd: sudo npm install pm2 -g
   - name: stop apt-daily timer to look for updates
     cmd: sudo systemctl stop apt-daily.timer
   - name: reset user in mysql
