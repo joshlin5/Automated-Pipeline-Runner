@@ -22,6 +22,7 @@ exports.builder = yargs => {
     yargs.options({
     });
 };
+
 exports.handler = async argv => {
     const { jsFile, processor } = argv;
     // console.log(jsFile)
@@ -30,11 +31,12 @@ exports.handler = async argv => {
     // let modFileName = fileName+'-mod.js';
     // rewrite(jsFile, modFileName)
 
-    for(let i =0; i< 2 ;i++){
+    for(let i =0; i < getRandomInt(7)  ;i++){
         for(let j in targetUrls){
             let url = targetUrls[j];
             let filename = `${regex.exec(url)[1]}-${i}`;
             // runServer();
+            rewrite(jsFile, filename)
             await screenshot(url, filename)
         }
     }
@@ -60,7 +62,7 @@ function rewrite( filepath, newPath ) {
 }
 
 function runServer(){
-
+    
 }
 
 async function screenshot(url, filename){
