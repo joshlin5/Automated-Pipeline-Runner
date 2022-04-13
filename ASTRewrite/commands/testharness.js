@@ -16,6 +16,7 @@ let targetUrls =[
     'http://localhost:3000/survey/variations.md'
 ]
 let regex = /http:\/\/localhost:3000\/survey\/(.*)\.md/
+let microserviceDir = '../checkbox.io-micro-preview/'
 exports.command = 'testharness <jsFile>';
 exports.desc = '';
 exports.builder = yargs => {
@@ -32,7 +33,7 @@ exports.handler = async argv => {
     // record the origin file name for recovery
     let oriFile = fileName+'_ori.js';
 
-    await execProvider.exec("cd ../checkbox.io-micro-preview/ && pm2 start index.js");
+    await execProvider.exec(`cd ${microserviceDir} && pm2 start index.js`);
 
     for(let i =0; i< 1 ;i++){
         for(let j in targetUrls){
@@ -79,7 +80,6 @@ async function checkServerReady(url){
             await delay(500);
         }
     }
-    console.log("test");
     await page.close();
     await browser.close();
 
