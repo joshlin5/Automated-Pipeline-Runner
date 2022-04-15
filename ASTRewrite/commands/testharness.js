@@ -41,7 +41,7 @@ exports.handler = async argv => {
             let url = targetUrls[j];
             let picFileName = `${regex.exec(url)[1]}-${i}`;
             rewrite(oriFile, jsFile)
-            await execProvider.exec("pm2 reload index");
+            await execProvider.exec("pm2 restart index");
             await checkServerReady(url);
             await screenshot(url, picFileName);
         }
@@ -49,6 +49,7 @@ exports.handler = async argv => {
 
     // recovery the file
     fs.copyFileSync(oriFile, `${fileName}.js`)
+    console.log("remove server")
     await execProvider.exec("pm2 kill")
 }
 
@@ -68,7 +69,6 @@ function rewrite( filepath, newPath ) {
 
 async function checkServerReady(url){
     const browser = await puppeteer.launch({
-        executablePath: '/usr/bin/chromium-browser',
         args: ['--no-sandbox']
     });
     const page = await browser.newPage();
@@ -81,9 +81,10 @@ async function checkServerReady(url){
             });
             break;
         }catch(error){
-            if(cnt>1000){
+            if(cnt>20){
                 throw error;
             }
+            console.log('waiting server start...')
             await delay(500);
         }
     }
@@ -95,7 +96,6 @@ async function checkServerReady(url){
 async function screenshot(url, filename){
     const fn = `./${filename}.png`;
     const browser = await puppeteer.launch({
-        executablePath: '/usr/bin/chromium-browser',
         args: ['--no-sandbox']
     });
     const page = await browser.newPage();
