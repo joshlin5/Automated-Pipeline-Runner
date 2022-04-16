@@ -13,7 +13,7 @@ let operations = [ NegateConditionals, conditionalBoundary, incremental,
 let targetUrls =[
     'http://localhost:3000/survey/long.md',
     'http://localhost:3000/survey/upload.md',
-    'http://locaslhost:3000/survey/survey.md',
+    'http://localhost:3000/survey/survey.md',
     'http://localhost:3000/survey/variations.md'
 ]
 let regex = /http:\/\/localhost:3000\/survey\/(.*)\.md/
