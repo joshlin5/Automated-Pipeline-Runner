@@ -61,11 +61,8 @@ function rewrite( filepath, newPath ) {
     var ast = esprima.parse(buf, options);    
 
     // Randomly picks a mutation to apply
-    var loop = getRandomInt(7);
-    for (x = 1; x <= 7; x++) {
-        let op = operations[getRandomInt(7)];
-        op(ast);
-    }
+    let op = operations[getRandomInt(7)];
+    op(ast);
 
     let code = escodegen.generate(ast);
     fs.writeFileSync( newPath, code);
