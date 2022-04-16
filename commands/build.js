@@ -33,6 +33,7 @@ exports.handler = async argv => {
     envParams.set("{MYSQL_PSSW}", process.env["MYSQL_PSSW"]);
     envParams.set("{GIT_USER}", process.env["GIT_USER"]);
     envParams.set("{TOKEN}", process.env["TOKEN"]);
+    envParams.set("{VOLUME}", process.env["VOLUME"]);
 
     for(let i in doc.setup){
         let task = doc.setup[i];

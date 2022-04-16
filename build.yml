@@ -52,13 +52,13 @@ jobs:
   - name: mutation-coverage
     steps:
       - name: remove all screenshot
-        cmd: rm -rf screenshots
+        cmd: rm -rf {VOLUME}/screenshots
       - name: make directory for screenshots
-        cmd: mkdir screenshots
+        cmd: mkdir {VOLUME}/screenshots
       - name: clone the microservice
         cmd: git clone https://github.com/chrisparnin/checkbox.io-micro-preview.git
       - name: move Testharness to ~/
-        cmd: cp -r /bakerx/ASTRewrite ASTRewrite/
+        cmd: cp -r {VOLUME}/ASTRewrite ASTRewrite/
       - name: install node dependencies for microservice
         cmd: "'cd ~/checkbox.io-micro-preview && npm install'"
       - name: install node dependencies for Testharness
