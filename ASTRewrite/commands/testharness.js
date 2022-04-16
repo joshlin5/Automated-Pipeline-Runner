@@ -333,7 +333,7 @@ function nonEmptyString(ast)
 	traverseWithParents(ast, (node) => {
         if( node.type === "Literal" && node.raw === "") {
             if( current === mutateTarget ) {
-                node.raw === "<div>Bug</div>";
+                node.raw == "<div>Bug</div>";
                 console.log( chalk.red(`Replacing "" with "<div>Bug</div>" on line ${node.loc.start.line}` ));
             }
         }
@@ -343,9 +343,14 @@ function nonEmptyString(ast)
 // TODO 8: Constant Replacement: 0 => 3
 function constantReplacement(ast)
 {
+    let ranOriginal = getRandomInt(10);
+    let ranReplacement = getRandomInt(10);
+    while (ranReplacement == ranOriginal) {
+        ranReplacement = getRandomInt(10);
+    }
     let candidates = 0;
     traverseWithParents(ast, (node) => {
-        if( node.type === "Literal" && node.value === "0" ) {
+        if( node.type === "Literal" && node.value === ranOriginal ) {
             candidates++;
         }
     })
@@ -353,10 +358,10 @@ function constantReplacement(ast)
     let mutateTarget = getRandomInt(candidates);
     let current = 0;
 	traverseWithParents(ast, (node) => {
-        if( node.type === "Literal" && node.value === "0") {
+        if( node.type === "Literal" && node.value === ranOriginal) {
             if( current === mutateTarget ) {
-                node.value === "3";
-                console.log( chalk.red(`Replacing 0 with 3 on line ${node.loc.start.line}` ));
+                node.value == ranReplacement;
+                console.log( chalk.red(`Replacing ${ranOriginal} with ${ranReplacement} on line ${node.loc.start.line}` ));
             }
         }
     })
