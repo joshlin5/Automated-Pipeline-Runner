@@ -3,7 +3,7 @@ const child = require('child_process');
 
 class ExecProvider {
     exec(cmd, write=false) {
-        console.log( chalk.yellowBright(`Running ${cmd}\n` ));
+        // console.log( chalk.yellowBright(`Running ${cmd}\n` ));
         return new Promise( (resolve, reject) => {
 
             let subprocess = child.exec(cmd);
@@ -13,7 +13,7 @@ class ExecProvider {
                 if (write) {
                     resolve(stdout.toString());
                 }
-                console.log( chalk.gray( stdout.toString() ));
+                // console.log( chalk.gray( stdout.toString() ));
             });
             subprocess.stderr.on('data', stderr => {
                 console.log( chalk.gray(stderr.toString() ));

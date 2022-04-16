@@ -13,11 +13,11 @@ let operations = [ NegateConditionals, conditionalBoundary, incremental,
 let targetUrls =[
     'http://localhost:3000/survey/long.md',
     'http://localhost:3000/survey/upload.md',
-    'http://locaslhost:3000/survey/survey.md',
+    'http://localhost:3000/survey/survey.md',
     'http://localhost:3000/survey/variations.md'
 ]
 let regex = /http:\/\/localhost:3000\/survey\/(.*)\.md/
-let microserviceDir = '~/checkbox.io-micro-preview/'
+let fileRegex = /(.*checkbox\.io-micro-preview\/)(.*).js/
 exports.command = 'testharness <jsFile>';
 exports.desc = '';
 exports.builder = yargs => {
@@ -27,47 +27,63 @@ exports.builder = yargs => {
 
 exports.handler = async argv => {
     const { jsFile, processor } = argv;
-    console.log(jsFile)
-    let fileRegex = /(.*)\.js$/
-    let fileName = fileRegex.exec(jsFile)[1];
-    // save the origin file for mutation
-    fs.copyFileSync(jsFile, `${fileName}_ori.js`)
+    let microserviceDir =fileRegex.exec(jsFile)[1];
+    let fileName = fileRegex.exec(jsFile)[2];
     // record the origin file name for recovery
-    let oriFile = fileName+'_ori.js';
+    let oriFile = `${microserviceDir}/${fileName}_ori.js`;
+    // save the origin file for mutation
+    fs.copyFileSync(jsFile, oriFile)
 
     await execProvider.exec(`cd ${microserviceDir} && pm2 start index.js`);
+    // save the origin page screenshot
+    for(let j in targetUrls){
+        let url = targetUrls[j];
+        await checkServerReady(url);
+        let picFileName = `${regex.exec(url)[1]}-ori`;
+        await screenshot(url, picFileName);
+    }
 
-    for(let i =0; i< 1 ;i++){
+    // start mutating
+    let mutCnt = 0;
+    let mutFailCnt = 0;
+    for(let i =0; i< 4 ;i++){
+        // operate mutation on each url and take the screenshot
         for(let j in targetUrls){
-            let url = targetUrls[j];
-            let picFileName = `${regex.exec(url)[1]}-${i}`;
-            rewrite(oriFile, jsFile)
-            await execProvider.exec("pm2 restart index");
-            await checkServerReady(url);
-            await screenshot(url, picFileName);
+            // if the server fails to start, record failing times.
+            try{
+                let url = targetUrls[j];
+                let picFileName = `${regex.exec(url)[1]}-${i}`;
+                rewrite(oriFile, jsFile)
+                await execProvider.exec("pm2 restart index");
+                await checkServerReady(url);
+                await screenshot(url, picFileName);
+            }catch(err){
+                mutFailCnt++;
+            }
+            console.log();
+            mutCnt++;
         }
     }
 
-    // recovery the file
-    fs.copyFileSync(oriFile, `${fileName}.js`)
-    console.log("remove server")
-    await execProvider.exec("pm2 kill")
+    // show the mutation coverage
+    console.log( chalk.red(`The mutation coverage is ${mutFailCnt}/${mutCnt}`));
 }
 
 
 function rewrite( filepath, newPath ) {
-    console.log(filepath, newPath)
     var buf = fs.readFileSync(filepath, "utf8");
     var ast = esprima.parse(buf, options);    
 
     // Randomly picks a mutation to apply
     let op = operations[getRandomInt(7)];
+    console.log( chalk.red(`Operating mutation ${op.name}` ));
     op(ast);
 
     let code = escodegen.generate(ast);
     fs.writeFileSync( newPath, code);
 }
 
+// check if pm2 is ready
 async function checkServerReady(url){
     const browser = await puppeteer.launch({
         args: ['--no-sandbox']
@@ -83,9 +99,11 @@ async function checkServerReady(url){
             break;
         }catch(error){
             if(cnt>20){
+                console.log( chalk.red(`Mutation fail!!!` ));
+                await page.close();
+                await browser.close();
                 throw error;
             }
-            console.log('waiting server start...')
             await delay(500);
         }
     }
@@ -95,7 +113,7 @@ async function checkServerReady(url){
 }
 
 async function screenshot(url, filename){
-    const fn = `./${filename}.png`;
+    const fn = `screenshots/${filename}.png`;
     const browser = await puppeteer.launch({
         args: ['--no-sandbox']
     });
@@ -235,7 +253,7 @@ function NegateConditionals(ast) {
 
     let candidates = 0;
     traverseWithParents(ast, (node) => {
-        if( node.type === "BinaryExpression" && (node.operator === ">" || node.operator === "==")) {
+        if( node.type === "BinaryExpression" && (node.operator == ">" || node.operator == "==")) {
             candidates++;
         }
     })
@@ -243,7 +261,7 @@ function NegateConditionals(ast) {
     let mutateTarget = getRandomInt(candidates);
     let current = 0;
     traverseWithParents(ast, (node) => {
-        if( node.type === "BinaryExpression" && (node.operator === ">" || node.operator === "==")) {
+        if( node.type === "BinaryExpression" && (node.operator == ">" || node.operator == "==")) {
             if( current === mutateTarget ) {
                 ori = node.operator;
                 node.operator = node.operator === ">" ? "<" : "!=";
@@ -306,6 +324,7 @@ function conditionalExpression(ast)
                     console.log( chalk.red(`Replacing || with && on line ${node.loc.start.line}` ));
                 }
             }
+            current++;
         }
     })
 }
@@ -336,6 +355,7 @@ function nonEmptyString(ast)
                 node.raw == "<div>Bug</div>";
                 console.log( chalk.red(`Replacing "" with "<div>Bug</div>" on line ${node.loc.start.line}` ));
             }
+            current++;
         }
     })
 }
@@ -363,6 +383,7 @@ function constantReplacement(ast)
                 node.value == ranReplacement;
                 console.log( chalk.red(`Replacing ${ranOriginal} with ${ranReplacement} on line ${node.loc.start.line}` ));
             }
+            current++;
         }
     })
 }

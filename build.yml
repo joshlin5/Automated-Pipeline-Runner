@@ -51,6 +51,10 @@ jobs:
         cmd: rm -rf iTrust2-v10
   - name: mutation-coverage
     steps:
+      - name: remove all screenshot
+        cmd: rm -rf screenshots
+      - name: make directory for screenshots
+        cmd: mkdir screenshots
       - name: clone the microservice
         cmd: git clone https://github.com/chrisparnin/checkbox.io-micro-preview.git
       - name: move Testharness to ~/
