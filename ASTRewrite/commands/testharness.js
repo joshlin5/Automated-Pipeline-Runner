@@ -13,7 +13,7 @@ let operations = [ NegateConditionals, conditionalBoundary, incremental,
 let targetUrls =[
     'http://localhost:3000/survey/long.md',
     'http://localhost:3000/survey/upload.md',
-    'http://localhost:3000/survey/survey.md',
+    'http://locaslhost:3000/survey/survey.md',
     'http://localhost:3000/survey/variations.md'
 ]
 let regex = /http:\/\/localhost:3000\/survey\/(.*)\.md/
@@ -24,6 +24,7 @@ exports.builder = yargs => {
     yargs.options({
     });
 };
+
 exports.handler = async argv => {
     const { jsFile, processor } = argv;
     let microserviceDir =fileRegex.exec(jsFile)[1];
@@ -73,6 +74,7 @@ function rewrite( filepath, newPath ) {
     var buf = fs.readFileSync(filepath, "utf8");
     var ast = esprima.parse(buf, options);    
 
+    // Randomly picks a mutation to apply
     let op = operations[getRandomInt(7)];
     console.log( chalk.red(`Operating mutation ${op.name}` ));
     op(ast);
