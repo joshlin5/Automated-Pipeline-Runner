@@ -331,9 +331,32 @@ function conditionalExpression(ast)
 // TODO 6: Clone return, early Find: "return embeddedHtml";, copy and insert in random location of function (before declaration).
 function cloneR(ast)
 {
+    let candidates = 0;
+    traverseWithParents(ast, (node) => {
+        if( node.type === "ReturnStatement" && node.name === "embeddedHtml" ) {
+            candidates++;
+        }
+    })
+
+    let mutateTarget = getRandomInt(candidates);
+    let current = 0;
 	traverseWithParents(ast, (node) => {
         if( node.type === "ReturnStatement" && node.name === "embeddedHtml") {
-            
+            if( current === mutateTarget ) {
+                let parentLine = 0;
+                let returnLine = node.loc.start.line;
+                temp = node;
+
+                // Traverse up the tree to find parent's starting line for the return statement
+                while(!temp.parent.hasOwnProperty("loc")) {
+                    temp = temp.parent;
+                }
+                parentLine = temp.parent.loc.start.line;
+                let randLine = Math.floor(Math.random() * (returnLine - parentLine) + parentLine);
+                console.log( chalk.red(`Moving return embeddedHtml from line ${node.loc.start.line} to line ${randLine}` ));
+                node.loc.start.line = randLine;
+            }
+            current++;
         }
     })
 }
