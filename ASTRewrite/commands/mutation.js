@@ -6,8 +6,8 @@ const fs = require("fs");
 const chalk = require('chalk');
 const { throws } = require("assert");
 // add cloneR when finished
-let operations = [ NegateConditionals, conditionalBoundary, incremental, cloneR,
-    controlFlow, conditionalExpression, nonEmptyString, constantReplacement ]
+let operations = [ NegateConditionals, conditionalBoundary, incremental, controlFlow,
+    cloneR, conditionalExpression, nonEmptyString, constantReplacement ]
 
 exports.command = 'mutate <jsFile> <newFileName>';
 exports.desc = '';
@@ -28,7 +28,7 @@ function rewrite( filepath, newPath ) {
     var ast = esprima.parse(buf, options);    
 
     // Randomly picks a mutation to apply
-    let op = operations[getRandomInt(8)];
+    let op = operations[getRandomInt(operations.length)];
     console.log( chalk.red(`Operating mutation ${op.name}` ));
     op(ast);
 
@@ -212,18 +212,14 @@ function conditionalExpression(ast)
     let mutateTarget = getRandomInt(candidates);
     let current = 0;
 	traverseWithParents(ast, (node) => {
-        if( node.type === "LogicalExpression") {
-            if (node.operator === "&&") {
-                if( current === mutateTarget ) {
-                    node.operator === "||";
-                    console.log( chalk.red(`Replacing && with || on line ${node.loc.start.line}` ));
-                }
+        if( node.type === "LogicalExpression" ) {
+            if (node.operator === "&&" && current === mutateTarget) {
+                node.operator = "||";
+                console.log( chalk.red(`Replacing && with || on line ${node.loc.start.line}` ));
             }
-            else if (node.operator === "||") {
-                if( current === mutateTarget ) {
-                    node.operator === "&&";
-                    console.log( chalk.red(`Replacing || with && on line ${node.loc.start.line}` ));
-                }
+            else if (node.operator === "||" && current === mutateTarget) {
+                node.operator = "&&";
+                console.log( chalk.red(`Replacing || with && on line ${node.loc.start.line}` ));
             }
             current++;
         }
@@ -234,7 +230,7 @@ function cloneR(ast)
 {
     let candidates = 0;
     traverseWithParents(ast, (node) => {
-        if( node.type === "ReturnStatement" && node.name === "embeddedHtml" ) {
+        if( node.type === "ReturnStatement") {
             candidates++;
         }
     })
@@ -242,22 +238,22 @@ function cloneR(ast)
     let mutateTarget = getRandomInt(candidates);
     let current = 0;
 	traverseWithParents(ast, (node) => {
-        if( node.type === "ReturnStatement" && node.name === "embeddedHtml") {
+        if( node.type === "ReturnStatement") {
             if( current === mutateTarget ) {
-                // Getting return embeddedHtml line
-                let returnLine = node.loc.start.line;
-                temp = node;
-
-                // Traverse up the tree to find parent's starting line for the return statement
-                while(temp.type !== "FunctionDeclaration") {
-                    temp = temp.parent;
+                let parent = node.parent;
+                let nIdx = 0;
+                // find the target return location
+                for( var i = 0; i < parent.length; i++){ 
+                    if ( parent[i].loc.start.line == node.loc.start.line) { 
+                        nIdx = i;
+                        break;
+                    }
                 }
-                // Getting starting block line that contains the return statement
-                let parentLine = temp.loc.start.line;
-                // Setting a random line number between the return statement and block starting line
-                let randLine = Math.floor(Math.random() * (returnLine - parentLine) + parentLine);
-                console.log( chalk.red(`Moving return embeddedHtml from line ${node.loc.start.line} to line ${randLine}` ));
-                node.loc.start.line = randLine;
+                let swap = nIdx != 0 ? getRandomInt(nIdx-1) : nIdx;
+                console.log( chalk.red(`Moving return embeddedHtml from line ${node.loc.start.line} to line ${parent[swap].loc.start.line}` ));
+                let tmp = parent[swap];
+                parent[swap] = node;
+                parent[nIdx] = tmp;
             }
             current++;
         }
@@ -278,7 +274,8 @@ function nonEmptyString(ast)
 	traverseWithParents(ast, (node) => {
         if( node.type === "Literal" && node.value === "") {
             if( current === mutateTarget ) {
-                node.raw == "<div>Bug</div>";
+                node.raw = "<div>Bug</div>";
+                node.value = "<div>Bug</div>";
                 console.log( chalk.red(`Replacing "" with "<div>Bug</div>" on line ${node.loc.start.line}` ));
             }
             current++;
@@ -289,14 +286,9 @@ function nonEmptyString(ast)
 // TODO 8: Constant Replacement: 0 => 3
 function constantReplacement(ast)
 {
-    let ranOriginal = getRandomInt(10);
-    let ranReplacement = getRandomInt(10);
-    while (ranReplacement == ranOriginal) {
-        ranReplacement = getRandomInt(10);
-    }
     let candidates = 0;
     traverseWithParents(ast, (node) => {
-        if( node.type === "Literal" && node.value === ranOriginal ) {
+        if( node.type === "Literal" && typeof node.value === 'number') {
             candidates++;
         }
     })
@@ -304,10 +296,16 @@ function constantReplacement(ast)
     let mutateTarget = getRandomInt(candidates);
     let current = 0;
 	traverseWithParents(ast, (node) => {
-        if( node.type === "Literal" && node.value === ranOriginal) {
+        if( node.type === "Literal" && typeof node.value === 'number') {
             if( current === mutateTarget ) {
-                node.value == ranReplacement;
-                console.log( chalk.red(`Replacing ${ranOriginal} with ${ranReplacement} on line ${node.loc.start.line}` ));
+                let ori = node.value;
+                let ranReplacement = getRandomInt(10);
+                while(ranReplacement == ori){
+                    ranReplacement = getRandomInt(10);
+                }
+                node.value = ranReplacement;
+                node.raw = ranReplacement;
+                console.log( chalk.red(`Replacing ${ori} with ${ranReplacement} on line ${node.loc.start.line}` ));
             }
             current++;
         }
