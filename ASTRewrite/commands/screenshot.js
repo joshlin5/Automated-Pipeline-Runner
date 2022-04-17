@@ -13,8 +13,10 @@ exports.builder = yargs => {
 
 exports.handler = async argv => {
     const { url, picName, processor } = argv;
-    if(await checkServerReady(url)){
+    if (await checkServerReady(url)) {
         await screenshot(url, picName);
+    } else {
+        throw "Server not getting ready"
     }
 }
 
