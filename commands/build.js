@@ -124,6 +124,7 @@ exports.handler = async argv => {
         resemble(file1).compareTo(file2).onComplete( function(comparisonData) {
             if (comparisonData.rawMisMatchPercentage > 0) {
                 console.log(chalk.redBright(`The mutation file ${file2.split("/").pop()} is ${comparisonData.rawMisMatchPercentage*100}% different compared to the original page.`));
+                throw "Image is not matching baseline image"
             }else{
                 console.log(chalk.redBright(`The mutation file ${file2.split("/").pop()} is the same as the original page.`));
             }
