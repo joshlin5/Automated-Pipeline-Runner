@@ -104,7 +104,7 @@ exports.handler = async argv => {
         await create_compare_screenshot(targetUrls, 'original', envParams)
         for (let i=1; i<=mutation.iterations; i++) {
             await runMutation(oriFile, mutation);
-            await provider.ssh(`cd ${microserviceDir} && pm2 restart index.js && cd`, sshCmd);
+            await provider.ssh(`cd ${microserviceDir} && pm2 kill && pm2 start index.js && cd`, sshCmd);
             await create_compare_screenshot(targetUrls, i, envParams).catch( (error) => {
                 mutFailCnt++;
                 console.log( chalk.redBright(`\nERROR: ${error}`) );
@@ -121,13 +121,9 @@ exports.handler = async argv => {
     }
 
     async function compare_screenshot(file1, file2) {
-        let ori = `screenshots/${file1}.png`
-        let change = `screenshots/${file2}.png`
-        console.log(ori, change)
-        resemble(ori).compareTo(change).onComplete( function(comparisonData) {
-            if (comparisonData.misMatchPercentage >= 0) {
-                console.log(comparisonData)
-                console.log(`The mutation file ${file2.split("/").pop()} is ${comparisonData.misMatchPercentage*100}% different compared to the original page.`);
+        resemble(file1).compareTo(file2).onComplete( function(comparisonData) {
+            if (comparisonData.rawMisMatchPercentage > 0) {
+                console.log(chalk.redBright(`The mutation file ${file2.split("/").pop()} is ${comparisonData.rawMisMatchPercentage*100}% different compared to the original page.`));
             }else{
                 console.log(chalk.redBright(`The mutation file ${file2.split("/").pop()} is the same as the original page.`));
             }
