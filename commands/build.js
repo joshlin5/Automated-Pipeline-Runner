@@ -64,7 +64,7 @@ exports.handler = async argv => {
             await packageInstallation(mutation.url);
             console.log(`Creating copy of original file: ${oriFile}`)
             await provider.ssh(`cp ${jsFile} ${oriFile}`, sshCmd);
-            await testharness(mutation, microserviceDir, oriFile);
+            await testharness(mutation, microserviceDir, oriFile, envParams);
             cleanUp(cleanup_steps);
         }
     } catch (error) {
@@ -96,18 +96,18 @@ exports.handler = async argv => {
         }
     }
 
-    async function testharness(mutation, microserviceDir, oriFile) {
+    async function testharness(mutation, microserviceDir, oriFile, envParams) {
         let targetUrls = mutation.snapshots
         let mutCnt = 0;
         let mutFailCnt = 0;
         await provider.ssh(`cd ${microserviceDir} && pm2 start index.js && cd`, sshCmd);
-        await create_compare_screenshot(targetUrls, 'original')
+        await create_compare_screenshot(targetUrls, 'original', envParams)
         for (let i=1; i<=mutation.iterations; i++) {
             await runMutation(oriFile, mutation);
             await provider.ssh(`cd ${microserviceDir} && pm2 restart index.js && cd`, sshCmd);
-            await create_compare_screenshot(targetUrls, i).catch( (error) => {
+            await create_compare_screenshot(targetUrls, i, envParams).catch( (error) => {
                 mutFailCnt++;
-                console.log( chalk.yellowBright(`\nERROR: ${error}`) );
+                console.log( chalk.redBright(`\nERROR: ${error}`) );
             });
             mutCnt++;
         }
@@ -121,16 +121,20 @@ exports.handler = async argv => {
     }
 
     async function compare_screenshot(file1, file2) {
-        // await provider.ssh(`astrewrite testharness ${file1} ${file2}`, sshCmd, envParams);
-        resemble(file1).compareTo(file2).onComplete( function(comparisonData) {
+        let ori = `screenshots/${file1}.png`
+        let change = `screenshots/${file2}.png`
+        console.log(ori, change)
+        resemble(ori).compareTo(change).onComplete( function(comparisonData) {
             if (comparisonData.misMatchPercentage >= 0) {
-                console.log(file2.split("/").pop(), comparisonData.misMatchPercentage);
-                throw `Mismatch Percentage is: ${comparisonData.misMatchPercentage}`
-            };
+                console.log(comparisonData)
+                console.log(`The mutation file ${file2.split("/").pop()} is ${comparisonData.misMatchPercentage*100}% different compared to the original page.`);
+            }else{
+
+            }
         });
     }
 
-    async function create_compare_screenshot(targetUrls, picFileNameSuffix) {
+    async function create_compare_screenshot(targetUrls, picFileNameSuffix, envParams) {
         for(let j in targetUrls){
             let url = targetUrls[j];
             console.log(`url: ${url}`)
@@ -145,6 +149,6 @@ exports.handler = async argv => {
     
     async function runMutation(oriFile, mutation) {
         jsFile = mutation.jsfile
-        await provider.ssh(`node ASTRewrite/index.js mutate ${oriFile} ${jsFile}`, sshCmd, envParams);
+        await provider.ssh(`node ASTRewrite/index.js mutate ${oriFile} ${jsFile}`, sshCmd, envParams)
     }
 };

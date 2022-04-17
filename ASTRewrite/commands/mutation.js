@@ -55,7 +55,7 @@ function traverseWithParents(object, visitor)
             if (typeof child === 'object' && child !== null && key != 'parent') 
             {
             	child.parent = object;
-					traverseWithParents(child, visitor);
+				traverseWithParents(child, visitor);
             }
         }
     }
@@ -268,7 +268,7 @@ function nonEmptyString(ast)
 {
     let candidates = 0;
     traverseWithParents(ast, (node) => {
-        if( node.type === "Literal" && node.raw === "" ) {
+        if( node.type === "Literal" && node.value === "" ) {
             candidates++;
         }
     })
@@ -276,7 +276,7 @@ function nonEmptyString(ast)
     let mutateTarget = getRandomInt(candidates);
     let current = 0;
 	traverseWithParents(ast, (node) => {
-        if( node.type === "Literal" && node.raw === "") {
+        if( node.type === "Literal" && node.value === "") {
             if( current === mutateTarget ) {
                 node.raw == "<div>Bug</div>";
                 console.log( chalk.red(`Replacing "" with "<div>Bug</div>" on line ${node.loc.start.line}` ));
