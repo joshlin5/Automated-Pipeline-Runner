@@ -13,8 +13,9 @@ exports.builder = yargs => {
 
 exports.handler = async argv => {
     const { url, picName, processor } = argv;
-    await checkServerReady(url);
-    await screenshot(url, picName);
+    if(await checkServerReady(url)){
+        await screenshot(url, picName);
+    }
 }
 
 
@@ -38,12 +39,14 @@ async function checkServerReady(url){
                 await page.close();
                 await browser.close();
                 console.log('Mutation fail to start server!!!');
+                return false;
             }
             await delay(500);
         }
     }
     await page.close();
     await browser.close();
+    return true;
 
 }
 
