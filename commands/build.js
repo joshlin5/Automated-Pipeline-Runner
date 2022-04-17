@@ -117,7 +117,6 @@ exports.handler = async argv => {
     async function packageInstallation(url) {
         await provider.ssh(`git clone ${url}`, sshCmd);
         dir_name = url.split("/").pop()
-        console.log(chalk.red(dir_name))
         await provider.ssh(`cd ${dir_name} && npm install && cd`, sshCmd);
     }
 
@@ -135,11 +134,11 @@ exports.handler = async argv => {
         for(let j in targetUrls){
             let url = targetUrls[j];
             console.log(`url: ${url}`)
-            let picFileName = `{VOLUME}/screenshots/${url.split("/").pop()}-${picFileNameSuffix}`;
-            await provider.ssh(`node ASTRewrite/index.js screenshot ${url} ${picFileName}`, sshCmd, envParams);
+            let picFileName = `screenshots/${url.split("/").pop()}-${picFileNameSuffix}`;
+            await provider.ssh(`node ASTRewrite/index.js screenshot ${url} {VOLUME}/${picFileName}`, sshCmd, envParams);
             if (picFileNameSuffix != "original") {
                 originalPicFileName = picFileName.replace(`-${picFileNameSuffix}$`, '-original')
-                await compare_screenshot(originalPicFileName, picFileName)
+                await compare_screenshot(`${originalPicFileName}.png`, `${picFileName}.png`)
             }
         }
     }
