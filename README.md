@@ -84,11 +84,12 @@ VOLUME=''
 ### Screencast for Intel
 [![Mutation Coverage Demo on Intel]()]()<br/>
 ### Screencast for M1
-[![Mutation Coverage Demo on M1]()]()
+[![Mutation Coverage Demo on M1]()](https://youtu.be/vUVsejQrMa0)
 
 
 ## [Checkpoint Report](https://github.ncsu.edu/CSC-DevOps-S22/DEVOPS-17/blob/main/CHECKPOINT-M1.md)
 This checkpoint report includes the tasks we have completed along with the team contributions, the issues we have faced while implementing or completing tasks, and what work remains after this checkpoint. There will also be a screenshot of the Github Project at the time this Checkpoint document was created.
 
-## [Milestone Report](https://github.ncsu.edu/CSC-DevOps-S22/DEVOPS-17/blob/main/MILESTONE-M2.md)
+## [Milestone Report](MILESTONE-M2.md)
+This milestone report includes the tasks we have completed along with the team contributions, the issues we have faced while implementing or completing tasks, and learnings from this milestone. There are specification for build.yml if certain parameters required to be updated along with a screenshot of the Github Project Board.
 
