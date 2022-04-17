@@ -6,7 +6,7 @@ const fs = require("fs");
 const chalk = require('chalk');
 const { throws } = require("assert");
 // add cloneR when finished
-let operations = [ NegateConditionals, conditionalBoundary, incremental, 
+let operations = [ NegateConditionals, conditionalBoundary, incremental, cloneR,
     controlFlow, conditionalExpression, nonEmptyString, constantReplacement ]
 
 exports.command = 'mutate <jsFile> <newFileName>';
@@ -28,7 +28,7 @@ function rewrite( filepath, newPath ) {
     var ast = esprima.parse(buf, options);    
 
     // Randomly picks a mutation to apply
-    let op = operations[getRandomInt(1)];
+    let op = operations[getRandomInt(8)];
     console.log( chalk.red(`Operating mutation ${op.name}` ));
     op(ast);
 
