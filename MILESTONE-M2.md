@@ -16,6 +16,20 @@
 | Screencast creation | @chung4 @jlin36 | | |
 | Execution for 1000 iterations | @vyadav | unexpectedly stop after 100-120 iterations | ensured page and browser get closed properly |
 
+#### Build YAML Specifications for Mutation Coverage Job
+The section which is required to be changed for choosing separate microservice or separate snapshot urls is under the `mutation` tag as shown below:
+```
+mutation:
+      url: <git url of the microservice>
+      jsfile: <path from root of repo to the js file that is chosen to mutate>
+      iterations: <number of mutations to run>
+      snapshots:
+        - <url1>
+        - <url2>
+        - <url3>
+        - <url4>
+```
+
 #### Screenshot location:
 screenshots folder at root contains all the screenshots for every mutation for almost every urls. 
 For the given urls if the image after mutation for any one of them doesn't match the original image, the image/screenshot creation for remaining urls are ignored for that mutation. So, the total number of images(except baseline image) would be <= 4000
