@@ -53,9 +53,9 @@ jobs:
   - name: mutation-coverage
     steps:
       - name: remove all screenshot
-        cmd: rm -rf {VOLUME}/screenshots
+        cmd: rm -rf screenshots
       - name: make directory for screenshots
-        cmd: mkdir {VOLUME}/screenshots
+        cmd: mkdir screenshots
       - name: clone the microservice
         cmd: git clone https://github.com/chrisparnin/checkbox.io-micro-preview.git
       - name: move Testharness to ~/
@@ -73,3 +73,9 @@ jobs:
         cmd: rm -rf ASTRewrite
       - name: remove microservice repo
         cmd: rm -rf checkbox.io-micro-preview
+      - name: remove all screenshot from shared volume
+        cmd: rm -rf {VOLUME}/screenshots/*
+      - name: move all screenshot to shared volume
+        cmd: mv screenshots {VOLUME}/screenshots
+      - name: remove local directory of screenshot
+        cmd: rm -rf screenshots
