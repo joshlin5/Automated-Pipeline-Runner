@@ -31,8 +31,10 @@ setup:
     cmd: sudo npm install pm2 -g
   - name: install yargs for npm
     cmd: npm install yargs
-  - name: install browser for puppteer
+  - name: install browser for puppeteer
     cmd: sudo apt install -y chromium-browser chromium-bsu -qq
+  - name: install puppeteer, escodegen, esprima and node-resemble-js
+    cmd: npm install puppeteer escodegen esprima node-resemble-js
   - name: stop apt-daily timer to look for updates
     cmd: sudo systemctl stop apt-daily.timer
 
@@ -52,20 +54,23 @@ jobs:
         cmd: rm -rf iTrust2-v10
   - name: mutation-coverage
     steps:
-      - name: remove all screenshot
-        cmd: rm -rf screenshots
+      - name: remove screenshot folder
+        cmd: rm -rf {VOLUME}/screenshots
       - name: make directory for screenshots
-        cmd: mkdir screenshots
-      - name: clone the microservice
-        cmd: git clone https://github.com/chrisparnin/checkbox.io-micro-preview.git
+        cmd: mkdir {VOLUME}/screenshots
       - name: move Testharness to ~/
         cmd: cp -r {VOLUME}/ASTRewrite ASTRewrite/
-      - name: install node dependencies for microservice
-        cmd: cd ~/checkbox.io-micro-preview && npm install
       - name: install node dependencies for Testharness
-        cmd: cd ~/ASTRewrite && npm install
-      - name: start mutation test
-        cmd: node ASTRewrite/index.js testharness ~/checkbox.io-micro-preview/marqdown.js
+        cmd: cd ~/ASTRewrite && npm install && cd
+    mutation:
+      url: https://github.com/chrisparnin/checkbox.io-micro-preview
+      jsfile: ~/checkbox.io-micro-preview/marqdown.js
+      iterations: 2
+      snapshots:
+        - http://localhost:3000/survey/long.md
+        - http://localhost:3000/survey/upload.md
+        - http://localhost:3000/survey/survey.md
+        - http://localhost:3000/survey/variations.md
     cleanup:
       - name: remove all web from pm2
         cmd: pm2 kill
@@ -73,9 +78,3 @@ jobs:
         cmd: rm -rf ASTRewrite
       - name: remove microservice repo
         cmd: rm -rf checkbox.io-micro-preview
-      - name: remove all screenshot from shared volume
-        cmd: rm -rf {VOLUME}/screenshots/*
-      - name: move all screenshot to shared volume
-        cmd: mv screenshots {VOLUME}/screenshots
-      - name: remove local directory of screenshot
-        cmd: rm -rf screenshots
