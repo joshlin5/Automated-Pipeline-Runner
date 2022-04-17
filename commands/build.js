@@ -6,7 +6,6 @@ const resemble = require("resemblejs");
 const yaml = require('js-yaml');
 const vmProvider = require("../lib/vmProvider");
 const bakerxProvider = require("../lib/bakerxProvider");
-const testharness = require("../ASTRewrite/commands/testharness");
 
 const { async } = require('hasbin');
 const { env } = require('process');
@@ -62,24 +61,10 @@ exports.handler = async argv => {
             let fileName = jsFile.split("/").pop();
             let microserviceDir = jsFile.replace(fileName, "");
             let oriFile = `${microserviceDir}${fileName.replace(".js", "-original.js")}`
-            let targetUrls = mutation.snapshots
-            let mutCnt = 0;
-            let mutFailCnt = 0;
             await packageInstallation(mutation.url);
             console.log(`Creating copy of original file: ${oriFile}`)
             await provider.ssh(`cp ${jsFile} ${oriFile}`, sshCmd);
-            await provider.ssh(`cd ${microserviceDir} && pm2 start index.js && cd`, sshCmd);
-            await create_compare_screenshot(targetUrls, 'original')
-            for (let i=1; i<=mutation.iterations; i++) {
-                await runMutation(oriFile, mutation);
-                await provider.ssh(`cd ${microserviceDir} && pm2 restart index.js && cd`, sshCmd);
-                await create_compare_screenshot(targetUrls, i).catch( (error) => {
-                    mutFailCnt++;
-                    console.log( chalk.yellowBright(`\nERROR: ${error}`) );
-                });
-                mutCnt++;
-            }
-            console.log( chalk.yellowBright(`THE MUTATION COVERAGE IS: ${mutFailCnt}/${mutCnt}`));
+            await testharness(mutation, microserviceDir, oriFile);
             cleanUp(cleanup_steps);
         }
     } catch (error) {
@@ -96,6 +81,14 @@ exports.handler = async argv => {
         }
     }
 
+    async function runSetup(setup_steps) {
+        for(let i in setup_steps){
+            let task = setup_steps[i];
+            console.log(chalk.green(task.name));
+            await provider.ssh(task.cmd, sshCmd, envParams)
+        }
+    }
+
     async function runBuildSteps(steps) {
         for (let step in steps){
             console.log( chalk.green(steps[step].name) );
@@ -103,12 +96,22 @@ exports.handler = async argv => {
         }
     }
 
-    async function runSetup(setup_steps) {
-        for(let i in setup_steps){
-            let task = setup_steps[i];
-            console.log(chalk.green(task.name));
-            await provider.ssh(task.cmd, sshCmd, envParams)
+    async function testharness(mutation, microserviceDir, oriFile) {
+        let targetUrls = mutation.snapshots
+        let mutCnt = 0;
+        let mutFailCnt = 0;
+        await provider.ssh(`cd ${microserviceDir} && pm2 start index.js && cd`, sshCmd);
+        await create_compare_screenshot(targetUrls, 'original')
+        for (let i=1; i<=mutation.iterations; i++) {
+            await runMutation(oriFile, mutation);
+            await provider.ssh(`cd ${microserviceDir} && pm2 restart index.js && cd`, sshCmd);
+            await create_compare_screenshot(targetUrls, i).catch( (error) => {
+                mutFailCnt++;
+                console.log( chalk.yellowBright(`\nERROR: ${error}`) );
+            });
+            mutCnt++;
         }
+        console.log( chalk.yellowBright(`THE MUTATION COVERAGE IS: ${mutFailCnt}/${mutCnt}`));
     }
 
     async function packageInstallation(url) {
@@ -133,10 +136,7 @@ exports.handler = async argv => {
             let url = targetUrls[j];
             console.log(`url: ${url}`)
             let picFileName = `{VOLUME}/screenshots/${url.split("/").pop()}-${picFileNameSuffix}`;
-            await provider.ssh(`node ~/ASTRewrite/index.js screenshot ${url} ${picFileName}`, sshCmd, envParams);
-            // await testharness.checkServerReady(url);
-            // console.log(`pic file: ${picFileName}`)
-            // await testharness.screenshot(url, picFileName);
+            await provider.ssh(`node ASTRewrite/index.js screenshot ${url} ${picFileName}`, sshCmd, envParams);
             if (picFileNameSuffix != "original") {
                 originalPicFileName = picFileName.replace(`-${picFileNameSuffix}$`, '-original')
                 await compare_screenshot(originalPicFileName, picFileName)
@@ -146,7 +146,6 @@ exports.handler = async argv => {
     
     async function runMutation(oriFile, mutation) {
         jsFile = mutation.jsfile
-        await provider.ssh(`node ~/ASTRewrite/index.js mutate ${oriFile} ${jsFile}`, sshCmd);
-        // await testharness.rewrite(oriFile, jsFile)
+        await provider.ssh(`node ASTRewrite/index.js mutate ${oriFile} ${jsFile}`, sshCmd, envParams);
     }
 };
