@@ -1,6 +1,5 @@
 
 const esprima = require("esprima");
-const puppeteer = require('puppeteer');
 const escodegen = require("escodegen");
 const options = {tokens:true, tolerant: true, loc: true, range: true };
 const fs = require("fs");
@@ -10,8 +9,6 @@ const { throws } = require("assert");
 let operations = [ NegateConditionals, conditionalBoundary, incremental, 
     controlFlow, conditionalExpression, nonEmptyString, constantReplacement ]
 
-let regex = /http:\/\/localhost:3000\/survey\/(.*)\.md/
-let fileRegex = /(.*checkbox\.io-micro-preview\/)(.*).js/
 exports.command = 'mutate <jsFile> <newFileName>';
 exports.desc = '';
 exports.builder = yargs => {
