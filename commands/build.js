@@ -104,7 +104,7 @@ exports.handler = async argv => {
         await create_compare_screenshot(targetUrls, 'original', envParams)
         for (let i=1; i<=mutation.iterations; i++) {
             await runMutation(oriFile, mutation);
-            await provider.ssh(`cd ${microserviceDir} && pm2 kill && pm2 start index.js && cd`, sshCmd);
+            await provider.ssh(`cd ${microserviceDir} && pm2 restart index.js && cd`, sshCmd);
             await create_compare_screenshot(targetUrls, i, envParams).catch( (error) => {
                 mutFailCnt++;
                 console.log( chalk.redBright(`\nERROR: ${error}`) );
