@@ -343,15 +343,17 @@ function cloneR(ast)
 	traverseWithParents(ast, (node) => {
         if( node.type === "ReturnStatement" && node.name === "embeddedHtml") {
             if( current === mutateTarget ) {
-                let parentLine = 0;
+                // Getting return embeddedHtml line
                 let returnLine = node.loc.start.line;
                 temp = node;
 
                 // Traverse up the tree to find parent's starting line for the return statement
-                while(!temp.parent.hasOwnProperty("loc")) {
+                while(temp.type !== "FunctionDeclaration") {
                     temp = temp.parent;
                 }
-                parentLine = temp.parent.loc.start.line;
+                // Getting starting block line that contains the return statement
+                let parentLine = temp.loc.start.line;
+                // Setting a random line number between the return statement and block starting line
                 let randLine = Math.floor(Math.random() * (returnLine - parentLine) + parentLine);
                 console.log( chalk.red(`Moving return embeddedHtml from line ${node.loc.start.line} to line ${randLine}` ));
                 node.loc.start.line = randLine;
