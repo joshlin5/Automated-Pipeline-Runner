@@ -129,7 +129,7 @@ exports.handler = async argv => {
                 console.log(comparisonData)
                 console.log(`The mutation file ${file2.split("/").pop()} is ${comparisonData.misMatchPercentage*100}% different compared to the original page.`);
             }else{
-
+                console.log(chalk.redBright(`The mutation file ${file2.split("/").pop()} is the same as the original page.`));
             }
         });
     }
@@ -137,11 +137,10 @@ exports.handler = async argv => {
     async function create_compare_screenshot(targetUrls, picFileNameSuffix, envParams) {
         for(let j in targetUrls){
             let url = targetUrls[j];
-            console.log(`url: ${url}`)
             let picFileName = `screenshots/${url.split("/").pop()}-${picFileNameSuffix}`;
             await provider.ssh(`node ASTRewrite/index.js screenshot ${url} {VOLUME}/${picFileName}`, sshCmd, envParams);
             if (picFileNameSuffix != "original") {
-                originalPicFileName = picFileName.replace(`-${picFileNameSuffix}$`, '-original')
+                originalPicFileName = picFileName.replace(`-${picFileNameSuffix}`, '-original')
                 await compare_screenshot(`${originalPicFileName}.png`, `${picFileName}.png`)
             }
         }

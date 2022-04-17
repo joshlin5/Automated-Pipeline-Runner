@@ -28,7 +28,7 @@ function rewrite( filepath, newPath ) {
     var ast = esprima.parse(buf, options);    
 
     // Randomly picks a mutation to apply
-    let op = operations[getRandomInt(7)];
+    let op = operations[getRandomInt(1)];
     console.log( chalk.red(`Operating mutation ${op.name}` ));
     op(ast);
 
@@ -176,28 +176,28 @@ function NegateConditionals(ast) {
 // TODO 4: Mutate control flow if => else if
 function controlFlow(ast)
 {
+    let tmp = [];
     let candidates = 0;
     traverseWithParents(ast, (node) => {
         if( node.type === "IfStatement") {
             candidates++;
+            tmp.push(node);
         }
     })
     
     let mutateTarget = getRandomInt(candidates);
-    let current = 0;
-    let previous;
-    traverseWithParents(ast, (node) => {
-        if( node.type === "IfStatement") {
-            if( current == mutateTarget) {
-                console.log( chalk.red(`convert if on line ${node.loc.start.line} to else if and relocated at line ${previous.loc.start.line}` ));
-                previous.alternate = node;
-
-            }else if(current == (mutateTarget-1)){
-                previous = node;
-            }
-            current++;
+    let current = tmp[mutateTarget];
+    let previous = mutateTarget != 0 ? tmp[mutateTarget-1] : tmp[mutateTarget];
+    console.log( chalk.red(`convert if on line ${current.loc.start.line} to else if and relocated at line ${previous.loc.start.line}` ));
+    previous.alternate = current;
+    let parent = current.parent;
+    // remove the if statement from origin location
+    for( var i = 0; i < parent.length; i++){ 
+        if ( parent[i].loc.start.line == current.loc.start.line) { 
+            parent.splice(i, 1); 
+            break;
         }
-    })
+    }
 }
 // TODO 5: Conditional expression mutation && => ||, || => &&
 function conditionalExpression(ast)
