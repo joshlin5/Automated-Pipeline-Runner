@@ -83,4 +83,4 @@ This checkpoint report includes the tasks we have completed along with the team 
 ### Screencast for Intel
 [![Intel Demo](./static/Intel_M2_demo.png)](https://drive.google.com/file/d/1ZukNw2L7_WN-hRPG59JYtsD6k8TpY4xr/view?usp=sharing "Intel Demo")<br/>
 ### Screencast for M1
-[![Screencast for M1](./static/M1_Screencasts_Thumbnail.png)](https://youtu.be/35rETvH5RFE)
+[![Screencast for M1](./static/M1_Screencasts_Thumbnail.png)](https://youtu.be/vUVsejQrMa0)
