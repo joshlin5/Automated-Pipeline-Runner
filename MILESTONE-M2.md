@@ -1,4 +1,4 @@
-# Milestone 2 (Pipeline > Test+Analysis)
+# Milestone 2 (Pipeline > Mutation Coverage)
 
 ## TASKS BREAKDOWN
 | Task | Contibution| Issue Encountered | Resolution |
@@ -16,27 +16,24 @@
 | Screencast creation | @chung4 @jlin36 | | |
 | Execution for 1000 iterations | @vyadav | unexpectedly stop after 100-120 iterations | ensured page and browser get closed properly |
 
-
-#### Mutation Coverage Formula:
-There is a minor change in only displaying the formula in screencast (the calculation happening at the backend is correct):
-- FAILED MUTATIONS does not include COMPILATION ERROR count, and hence the mutation coverage is FAILED / (TOTAL - COMPILATION ERRORS) which is 30% as shown.
+#### Screenshot location:
+screenshots folder at root contains all the screenshots for every mutation for almost every urls. 
+For the given urls if the image after mutation for any one of them doesn't match the original image, the image/screenshot creation for remaining urls are ignored for that mutation. So, the total number of images(except baseline image) would be <= 4000
 
 ### Pre-requisites needed to run Milestone 2:
 `js-yaml` is a dependency that is installed automatically. In case `pipeline init` gives an error related to `js-yaml`, please run the following command:
 - `npm install js-yaml --save-prod`
-
- `yargs` module should be present once the repository is cloned. In case it throws an error for yargs module, please run the following command:
- - `npm install --save @types/yargs`
  
- `fs-extra` module should be present. In case it throws an error, please run the following command:
- - `npm install fs-extra`
+`fs-extra` module should be present. In case it throws an error, please run the following command:
+- `npm install fs-extra`
 
 ### Learnings/Experiences in Milestone 2:
 - Esprima and escodegen functionalities 
 - ASTRewrite ast tree traversal for mutator automation
-- build.yml automation to ensure plus and play of commands helps in extending the project to install any dependency
+- build.yml automation to ensure commands helps in extending the project to install any dependency
 - snapshot generation 
 - resemblejs functionalities
-
+- Synchronous call to Asynchronous functions
 
 ### Project Board:
+![GitHub Project Board Screenshot](/resources/M2-Project-Board.png)
