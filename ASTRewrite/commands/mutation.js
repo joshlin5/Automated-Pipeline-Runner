@@ -187,7 +187,7 @@ function controlFlow(ast)
     
     let mutateTarget = getRandomInt(candidates);
     let current = tmp[mutateTarget];
-    let previous = tmp[mutateTarget-1];
+    let previous = mutateTarget != 0 ? tmp[mutateTarget-1] : tmp[mutateTarget];
     console.log( chalk.red(`convert if on line ${current.loc.start.line} to else if and relocated at line ${previous.loc.start.line}` ));
     previous.alternate = current;
     let parent = current.parent;
