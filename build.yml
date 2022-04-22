@@ -56,7 +56,7 @@ jobs:
     steps:
       - name: remove screenshot folder
         cmd: rm -rf {VOLUME}/screenshots
-      - name: make directory for screenshots
+      - name: make directory for screenshotsbaker
         cmd: mkdir {VOLUME}/screenshots
       - name: move Testharness to ~/
         cmd: cp -r {VOLUME}/ASTRewrite ASTRewrite/
@@ -78,3 +78,24 @@ jobs:
         cmd: rm -rf ASTRewrite
       - name: remove microservice repo
         cmd: rm -rf checkbox.io-micro-preview
+  - name: deploy-iTrusts
+    steps:
+      - name: shutdown the server 
+        cmd: sudo killall -q 'java'
+      - name: clone latest version of iTrust2
+        cmd: git clone https://{GIT_USER}:{TOKEN}@github.ncsu.edu/engr-csc326-staff/iTrust2-v10.git
+      - name: copy application.yml.template to application.yml
+        cmd: cp iTrust2-v10/iTrust2/src/main/resources/application.yml.template iTrust2-v10/iTrust2/src/main/resources/application.yml
+      - name: update password in application.yml
+        cmd: sed -i 's/password:/password:\ {MYSQL_PSSW}/' iTrust2-v10/iTrust2/src/main/resources/application.yml
+      - name: pacakge iTrust2-v10
+        cmd: cd iTrust2-v10/iTrust2 && mvn clean package -Dmaven.test.skip=true
+      - name: cp the jar file
+        cmd: cp iTrust2-v10/iTrust2/target/iTrust2-10.jar ~/
+      - name: start the iTrust2 server 1
+        cmd: nohup java -jar iTrust2-10.jar --server.port=8080  &> /dev/null &
+      - name: start the iTrust2 server 2
+        cmd: nohup java -jar iTrust2-10.jar --server.port=8081  &> /dev/null &
+    cleanup:
+      - name: remove iTrust2-v10 repo
+        cmd: rm -rf iTrust2-v10

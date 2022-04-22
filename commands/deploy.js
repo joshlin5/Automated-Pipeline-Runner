@@ -9,8 +9,8 @@ const bakerxProvider = require("../lib/bakerxProvider");
 
 const { async } = require('hasbin');
 const { env } = require('process');
-exports.command = 'build <job_name> <buildFile_path>';
-exports.desc = 'Trigger a build job, running steps outlined by build.yml, wait for output, and print build log.';
+exports.command = 'deploy inventory <job_name> <buildFile_path>';
+exports.desc = 'Trigger a deploy job, running steps outlined by build.yml, wait for output, and print build log.';
 exports.builder = yargs => {
     yargs.options({
     });
@@ -54,22 +54,9 @@ exports.handler = async argv => {
 
     try {
         await runBuildSteps(steps);
-
-        if ("mutation" in currentJob){
-            mutation = currentJob.mutation
-            let jsFile = mutation.jsfile
-            let fileName = jsFile.split("/").pop();
-            let microserviceDir = jsFile.replace(fileName, "");
-            let oriFile = `${microserviceDir}${fileName.replace(".js", "-original.js")}`
-            await packageInstallation(mutation.url);
-            console.log(`Creating copy of original file: ${oriFile}`)
-            await provider.ssh(`cp ${jsFile} ${oriFile}`, sshCmd);
-            await testharness(mutation, microserviceDir, oriFile, envParams);
-        }
     } catch (error) {
         console.log( chalk.yellowBright (`Error ${error}`))
     }
-        
     cleanUp(cleanup_steps);
     
 
