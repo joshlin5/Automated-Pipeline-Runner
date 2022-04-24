@@ -6,8 +6,9 @@ const fs = require('fs')
 var config = {};
 // Retrieve our api token from the environment variables.
 config.token = "dop_v1_f763a806ee6ae57278e86686c6e74a4bbe7bdc28035e19358db4c9323b74e190";
-ssh_fingerprint = "Q3xZjh3ckf0D2wabwXwkAxgCZwaSwl4N1kzp/6uRW0o Joshua@MacBook-Pro-4.lan";
-var dropletId = 296751314;
+var ssh_fingerprint = "40:dd:11:a4:03:cc:5f:7c:bd:c2:a7:7a:00:85:03:21/6uRW0o";
+var dropletId = 0;
+var sshIds = [];
 
 if( !config.token )
 {
@@ -65,6 +66,21 @@ class DigitalOceanProvider
 		});
 	}
 
+    async listSshKeys( )
+	{
+		console.log('#######list ssh keys#######');
+		// HINT: Add this to the end to get better filter results: ?type=distribution&per_page=100
+		let response = await axios.get('https://api.digitalocean.com/v2/account/keys', { headers: headers })
+							 .catch(err => console.error(`listSshKeys ${err}`));
+		if( !response ) return;
+
+		response.data.ssh_keys.forEach(element => {
+            sshIds.push(element.id);
+			console.log(element.id);
+		});
+        console.log("sshs: " + sshIds);
+	}
+
 	async createDroplet (dropletName, region, imageName )
 	{
 		console.log('#######create droplet#######');
@@ -80,7 +96,7 @@ class DigitalOceanProvider
 			"region":region,
 			"size":"s-1vcpu-1gb",
 			"image":imageName,
-			"ssh_keys":null,
+			"ssh_keys": sshIds,
 			"backups":false,
 			"ipv6":false,
 			"user_data":null,
@@ -96,15 +112,24 @@ class DigitalOceanProvider
 		}).catch( err => 
 			console.error(chalk.red(`createDroplet: ${err}`)) 
 		);
-        console.log( chalk.yellow(`Calls remaining ${response.headers["ratelimit-remaining"]}`) );
-		if( !response ) return;
-
+        // console.log( chalk.yellow(`Calls remaining ${response.headers["ratelimit-remaining"]}`) );
+		// if( !response ) return;
+        console.log(response);
 		console.log(response.status);
 		console.log(response.data);
 
 		if(response.status == 202)
 		{
             dropletId = response.data.droplet.id;
+            var inventory =
+                "connectionData :\n" + 
+                  " dropletID: " + dropletId + "\n";
+
+            fs.writeFile('inventory.txt', inventory, (err) => {
+          
+                // In case of a error throw err.
+                if (err) throw err;
+            })
 			console.log(chalk.green(`Created droplet id ${response.data.droplet.id}`));
 		}
 	}
@@ -129,27 +154,29 @@ class DigitalOceanProvider
 			let droplet = response.data.droplet;
             var ipv4IP;
             var ipv6IP;
-
-			// Print out IP address
-			droplet.networks.v4.forEach(ele =>{
-                ipv4IP = ele.ip_address;
-				console.log(ipv4IP);
-			})
-			droplet.networks.v6.forEach(ele =>{
-                ipv6IP = ele.ip_address;
-				console.log(ipv6IP);
-			})
-            var inventory =
-                "connectionData :\n" + 
-                  " dropletName: " + droplet.name + "\n" + 
-                  " IPV4 IP Address: " + ipv4IP + "\n" + 
-                  " IPV6 IP Address: " + ipv6IP;
-
-            fs.writeFile('inventory.txt', inventory, (err) => {
+            
+            // Data to write to inventory file
+            fs.appendFile('inventory.txt', " dropletName: " + droplet.name + "\n", (err) => {
           
                 // In case of a error throw err.
                 if (err) throw err;
             })
+
+			// Print out IP address
+			droplet.networks.v4.forEach(ele =>{
+                ipv4IP = ele.ip_address;
+                fs.appendFile('inventory.txt', " IPV4 IP Address: " + ipv4IP + "\n", function (err) {
+                    if (err) throw err;
+                  })
+				console.log(ipv4IP);
+			})
+			droplet.networks.v6.forEach(ele =>{
+                ipv6IP = ele.ip_address;
+                fs.appendFile('inventory.txt', " IPV6 IP Address: " + ipv6IP + "\n", function (err) {
+                    if (err) throw err;
+                  })
+				console.log(ipv6IP);
+			})
 		}
 	}
 
@@ -198,13 +225,15 @@ async function provision()
 	// - use 'slug' property or id if slug is null
 	// await client.listImages();
 
+    await client.listSshKeys();
+
 	// #############################################
 	// #3 Create an droplet with the specified name, region, and image
 	// Comment out when completed. ONLY RUN ONCE!!!!!
 	var name = "jiln36"+os.hostname();
 	var region = "nyc1"; // Fill one in from #1
 	var image = "ubuntu-20-04-x64"; // Fill one in from #2
-	// await client.createDroplet(name, region, image);
+	await client.createDroplet(name, region, image);
 
 	// Record the droplet id that you see print out in a variable.
 	// We will use this to interact with our droplet for the next steps.
