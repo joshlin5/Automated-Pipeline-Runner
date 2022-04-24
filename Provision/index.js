@@ -3,10 +3,12 @@ const chalk  = require('chalk');
 const os     = require('os');
 const fs = require('fs')
 
+// Command to run to connection to droplet (instance)
+// ssh -i path/to/private/key root@ip.address.of.instance
+
 var config = {};
 // Retrieve our api token from the environment variables.
 config.token = "dop_v1_f763a806ee6ae57278e86686c6e74a4bbe7bdc28035e19358db4c9323b74e190";
-var ssh_fingerprint = "40:dd:11:a4:03:cc:5f:7c:bd:c2:a7:7a:00:85:03:21/6uRW0o";
 var dropletId = 0;
 var sshIds = [];
 
