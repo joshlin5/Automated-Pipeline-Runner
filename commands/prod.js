@@ -85,7 +85,7 @@ exports.handler = async argv => {
 	}
 
     async function listSshKeys(headers){
-		console.log('#######list ssh keys#######');
+		// console.log('#######list ssh keys#######');
 		// HINT: Add this to the end to get better filter results: ?type=distribution&per_page=100
 		let response = await axios.get('https://api.digitalocean.com/v2/account/keys', { headers: headers })
 							 .catch(err => console.error(`listSshKeys ${err}`));
@@ -96,6 +96,12 @@ exports.handler = async argv => {
 		response.data.ssh_keys.forEach(element => {
             sshIds.push(element.id);
 		});
+		console.log("sshs: " + sshIds);
+        fs.writeFile('../inventory.txt', "sshIds: " + sshIds + "\n", (err) => {
+          
+            // In case of a error throw err.
+            if (err) throw err;
+        })
         return sshIds;
 	}
 
@@ -144,12 +150,54 @@ exports.handler = async argv => {
                 "connectionData :\n" + 
                   " dropletID: " + dropletId + "\n";
 
-            fs.writeFile('inventory.txt', inventory, (err) => {
+            fs.writeFile('../inventory.txt', inventory, (err) => {
           
                 // In case of a error throw err.
                 if (err) throw err;
             })
 			console.log(chalk.green(`Created droplet id ${response.data.droplet.id}`));
+		}
+		// console.log('#######droplet info#######');
+		if( typeof id != "number" )
+		{
+			console.log( chalk.red("You must provide an integer id for your droplet!") );
+			return;
+		}
+
+		// Make REST request
+		response = await axios.get('https://api.digitalocean.com/v2/droplets/'+id, { headers: headers })
+				.catch(err => console.error(`dropletInfo ${err}`));
+        console.log( chalk.yellow(`Calls remaining ${response.headers["ratelimit-remaining"]}`) );
+		if( !response ) return;
+
+		if( response.data.droplet )
+		{
+			let droplet = response.data.droplet;
+            var ipv4IP;
+            var ipv6IP;
+            
+            // Data to write to inventory file
+            fs.appendFile('../inventory.txt', "dropletName: " + droplet.name + "\n", (err) => {
+          
+                // In case of a error throw err.
+                if (err) throw err;
+            })
+			// Print out IP address
+			droplet.networks.v4.forEach(ele =>{
+                ipv4IP = ele.ip_address;
+                fs.appendFile('../inventory.txt', "IPV4 IP Address: " + ipv4IP + "\n", function (err) {
+                    if (err) throw err;
+                  })
+				// console.log(ipv4IP);
+			})
+			droplet.networks.v6.forEach(ele =>{
+                ipv6IP = ele.ip_address;
+                fs.appendFile('../inventory.txt', "IPV6 IP Address: " + ipv6IP + "\n", function (err) {
+                    if (err) throw err;
+                  })
+				// console.log(ipv6IP);
+			})
+            console.log("Inventory Saved to: inventory.txt");
 		}
 	}
 };
