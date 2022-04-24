@@ -14,7 +14,7 @@ exports.builder = yargs => {
 
 exports.handler = async argv => {
     const { processor } = argv;
-    const vm_name = 'M2';
+    const vm_name = 'M3';
     console.log(chalk.green("Preparing computing environment..."));
     let provider = processor == "Arm64" ? vmProvider : bakerxProvider;
     await provider.delete(vm_name);

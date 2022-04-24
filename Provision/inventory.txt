@@ -1,0 +1,4 @@
+connectionData :
+ dropletName: jiln36MacBook-Pro-4.lan
+ IPV4 IP Address: 10.116.0.2
+ IPV6 IP Address: undefined
