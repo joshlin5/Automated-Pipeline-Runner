@@ -1,0 +1,16 @@
+{
+    "name": "provision",
+    "version": "0.5.0",
+    "description": "\"Digital ocean api\"",
+    "main": "main.js",
+    "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+      "axios": "^0.25.0",
+      "chalk": "^2.4.2"
+    }
+  }
+  

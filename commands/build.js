@@ -82,11 +82,11 @@ exports.handler = async argv => {
     }
 
     async function runSetup(setup_steps) {
-        for(let i in setup_steps){
+        /*for(let i in setup_steps){
             let task = setup_steps[i];
             console.log(chalk.green(task.name));
             await provider.ssh(task.cmd, sshCmd, envParams)
-        }
+        }*/
     }
 
     async function runBuildSteps(steps) {
@@ -102,7 +102,7 @@ exports.handler = async argv => {
         let mutFailCnt = 0;
         await provider.ssh(`cd ${microserviceDir} && pm2 start index.js && cd`, sshCmd);
         await create_compare_screenshot(targetUrls, 'original', envParams)
-        for (let i=1; i<=mutation.iterations; i++) {
+        for (let i=750; i<=mutation.iterations; i++) {
             await runMutation(oriFile, mutation);
             await provider.ssh(`cd ${microserviceDir} && pm2 restart index.js && cd`, sshCmd);
             await create_compare_screenshot(targetUrls, i, envParams).catch( (error) => {

@@ -65,7 +65,7 @@ jobs:
     mutation:
       url: https://github.com/chrisparnin/checkbox.io-micro-preview
       jsfile: checkbox.io-micro-preview/marqdown.js
-      iterations: 10
+      iterations: 1000
       snapshots:
         - http://localhost:3000/survey/long.md
         - http://localhost:3000/survey/upload.md
