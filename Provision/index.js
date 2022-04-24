@@ -32,45 +32,10 @@ const headers =
 
 class DigitalOceanProvider
 {
-	async listRegions()
-	{
-		let response = await axios.get('https://api.digitalocean.com/v2/regions', { headers: headers })
-							 .catch(err => console.error(`listRegions ${err}`));
-							 
-		if( !response ) return;
-
-		// console.log( response.data );
-		
-		if( response.data.regions )
-		{
-			for( let region of response.data.regions)
-			{
-				console.log(region.slug, region.name)
-			}
-		}
-
-		if( response.headers )
-		{
-			console.log( chalk.yellow(`Calls remaining ${response.headers["ratelimit-remaining"]}`) );
-		}
-	}
-
-	async listImages( )
-	{
-		console.log('#######list images#######');
-		// HINT: Add this to the end to get better filter results: ?type=distribution&per_page=100
-		let response = await axios.get('https://api.digitalocean.com/v2/images?type=distribution&per_page=100', { headers: headers })
-							 .catch(err => console.error(`listImages ${err}`));
-		if( !response ) return;
-
-		response.data.images.forEach(element => {
-			console.log(element.slug);
-		});
-	}
 
     async listSshKeys( )
 	{
-		console.log('#######list ssh keys#######');
+		// console.log('#######list ssh keys#######');
 		// HINT: Add this to the end to get better filter results: ?type=distribution&per_page=100
 		let response = await axios.get('https://api.digitalocean.com/v2/account/keys', { headers: headers })
 							 .catch(err => console.error(`listSshKeys ${err}`));
@@ -78,17 +43,22 @@ class DigitalOceanProvider
 
 		response.data.ssh_keys.forEach(element => {
             sshIds.push(element.id);
-			console.log(element.id);
+			// console.log(element.id);
 		});
         console.log("sshs: " + sshIds);
+        fs.writeFile('inventory.txt', "sshIds: " + sshIds + "\n", (err) => {
+          
+            // In case of a error throw err.
+            if (err) throw err;
+        })
 	}
 
 	async createDroplet (dropletName, region, imageName )
 	{
-		console.log('#######create droplet#######');
+		// console.log('#######create droplet#######');
 		if( dropletName == "" || region == "" || imageName == "" )
 		{
-			console.log( chalk.red("You must provide non-empty parameters for createDroplet!") );
+			// console.log( chalk.red("You must provide non-empty parameters for createDroplet!") );
 			return;
 		}
 
@@ -105,7 +75,7 @@ class DigitalOceanProvider
 			"private_networking":null
 		};
 
-		console.log("Attempting to create: "+ JSON.stringify(data) );
+		// console.log("Attempting to create: "+ JSON.stringify(data) );
 
 		let response = await axios.post("https://api.digitalocean.com/v2/droplets", 
 		data,
@@ -116,18 +86,16 @@ class DigitalOceanProvider
 		);
         // console.log( chalk.yellow(`Calls remaining ${response.headers["ratelimit-remaining"]}`) );
 		// if( !response ) return;
-        console.log(response);
-		console.log(response.status);
-		console.log(response.data);
+        // console.log(response);
+		// console.log(response.status);
+		// console.log(response.data);
 
 		if(response.status == 202)
 		{
             dropletId = response.data.droplet.id;
-            var inventory =
-                "connectionData :\n" + 
-                  " dropletID: " + dropletId + "\n";
+            var inventory = "dropletID: " + dropletId + "\n";
 
-            fs.writeFile('inventory.txt', inventory, (err) => {
+            fs.appendFile('inventory.txt', inventory, (err) => {
           
                 // In case of a error throw err.
                 if (err) throw err;
@@ -138,7 +106,7 @@ class DigitalOceanProvider
 
 	async dropletInfo (id)
 	{
-		console.log('#######droplet info#######');
+		// console.log('#######droplet info#######');
 		if( typeof id != "number" )
 		{
 			console.log( chalk.red("You must provide an integer id for your droplet!") );
@@ -158,32 +126,33 @@ class DigitalOceanProvider
             var ipv6IP;
             
             // Data to write to inventory file
-            fs.appendFile('inventory.txt', " dropletName: " + droplet.name + "\n", (err) => {
+            fs.appendFile('inventory.txt', "dropletName: " + droplet.name + "\n", (err) => {
           
                 // In case of a error throw err.
                 if (err) throw err;
             })
-
 			// Print out IP address
 			droplet.networks.v4.forEach(ele =>{
                 ipv4IP = ele.ip_address;
-                fs.appendFile('inventory.txt', " IPV4 IP Address: " + ipv4IP + "\n", function (err) {
+                fs.appendFile('inventory.txt', "IPV4 IP Address: " + ipv4IP + "\n", function (err) {
                     if (err) throw err;
                   })
-				console.log(ipv4IP);
+				// console.log(ipv4IP);
 			})
 			droplet.networks.v6.forEach(ele =>{
                 ipv6IP = ele.ip_address;
-                fs.appendFile('inventory.txt', " IPV6 IP Address: " + ipv6IP + "\n", function (err) {
+                fs.appendFile('inventory.txt', "IPV6 IP Address: " + ipv6IP + "\n", function (err) {
                     if (err) throw err;
                   })
-				console.log(ipv6IP);
+				// console.log(ipv6IP);
 			})
+            console.log("Inventory Saved to: inventory.txt");
 		}
 	}
 
 	async deleteDroplet(id)
 	{
+        console.log("Recieved " + id);
 		if( typeof id != "number" )
 		{
 			console.log( chalk.red("You must provide an integer id for your droplet!") );
@@ -207,67 +176,31 @@ class DigitalOceanProvider
 
 };
 
-
-async function provision()
-{
-	let client = new DigitalOceanProvider();
-
-	// #############################################
-	// #1 Print out a list of available regions
-	// Comment out when completed.
-	// https://developers.digitalocean.com/documentation/v2/#list-all-regions
-	// use 'slug' property
-	// await client.listRegions();
-
-	// #############################################
-	// #2 Extend the client object to have a listImages method
-	// Comment out when completed.
-	// https://developers.digitalocean.com/documentation/v2/#images
-	// - Print out a list of available system images, that are AVAILABLE in a specified region.
-	// - use 'slug' property or id if slug is null
-	// await client.listImages();
-
+async function provisionInstance() {
+    let client = new DigitalOceanProvider();
     await client.listSshKeys();
-
-	// #############################################
-	// #3 Create an droplet with the specified name, region, and image
-	// Comment out when completed. ONLY RUN ONCE!!!!!
-	var name = "jiln36"+os.hostname();
-	var region = "nyc1"; // Fill one in from #1
-	var image = "ubuntu-20-04-x64"; // Fill one in from #2
+    var name = "jiln36"+os.hostname();
+	var region = "nyc1";
+	var image = "ubuntu-20-04-x64";
 	await client.createDroplet(name, region, image);
-
-	// Record the droplet id that you see print out in a variable.
-	// We will use this to interact with our droplet for the next steps.
-	// var dropletId = 286165217;
-
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// BEFORE MOVING TO STEP FOR, REMEMBER TO COMMENT OUT THE `createDroplet()` call!!!
-
-	// #############################################
-	// #4 Extend the client to retrieve information about a specified droplet.
-	// Comment out when done.
-	// https://developers.digitalocean.com/documentation/v2/#retrieve-an-existing-droplet-by-id
-	// REMEMBER POST != GET
-	// Most importantly, print out IP address!
-	await client.dropletInfo(dropletId);
-	
-	// #############################################
-	// #5 In the command line, ping your server, make sure it is alive!
-	// ping xx.xx.xx.xx
-
-	// #############################################
-	// #6 Extend the client to DESTROY the specified droplet.
-	// https://developers.digitalocean.com/documentation/v2/#delete-a-droplet
-	// await client.deleteDroplet(dropletId);
-
-	// #############################################
-	// #7 In the command line, ping your server, make sure it is dead!
-	// ping xx.xx.xx.xx
+    await client.dropletInfo(dropletId);
 }
 
+async function deleteInstance() {
+    let client = new DigitalOceanProvider();
+    var id;
+    await fs.readFile('inventory.txt', 'utf-8', (err, data) => {
+        if (err) throw err;
+      
+        // Converting Raw Buffer to text
+        // data using tostring function.
+        var id = parseInt(data.split('\n')[1].split(" ")[1]);
+        client.deleteDroplet(id);
+    })
+}
 
 // Run workshop code...
 (async () => {
-	await provision();
+    // await provisionInstance();
+	await deleteInstance();
 })();
