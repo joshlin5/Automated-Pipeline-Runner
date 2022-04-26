@@ -3,13 +3,12 @@ const chalk = require('chalk');
 const fs = require('fs');
 const path = require('path');
 const resemble = require("resemblejs");
+const readline = require("readline")
 const yaml = require('js-yaml');
+const build = require('./build.js');
 const vmProvider = require("../lib/vmProvider");
 const bakerxProvider = require("../lib/bakerxProvider");
-
-const { async } = require('hasbin');
-const { env } = require('process');
-exports.command = 'deploy inventory <job_name> <buildFile_path>';
+exports.command = 'deploy <inventory_path> <job_name> <buildFile_path>';
 exports.desc = 'Trigger a deploy job, running steps outlined by build.yml, wait for output, and print build log.';
 exports.builder = yargs => {
     yargs.options({
@@ -18,20 +17,20 @@ exports.builder = yargs => {
 
 
 exports.handler = async argv => {
-    const { job_name, buildFile_path, processor } = argv;
+    const { inventory_path, job_name, buildFile_path, processor } = argv;
     
-    console.log(chalk.green("triggering a build job"));
+    console.log(chalk.green("triggering a deploy job"));
     console.log(chalk.green(`Using the yml file: ${buildFile_path}`));
+    console.log(chalk.green(`Using the inventory file: ${inventory_path}`));
     let doc = yaml.load(fs.readFileSync(buildFile_path, 'utf8'));
+    let inventory = readInventory(inventory_path);
+    let sshCmd = sshConfig(inventory);
+    
     let provider = null;
-    let vm_name = 'M3'
-    let sshCmd = '';
     if (processor == "Intel/Amd64") {
         provider = bakerxProvider
-        sshCmd = await provider.sshConfig(vm_name)
     } else {
         provider = vmProvider
-        sshCmd = `ssh ${vm_name}`
     }
     let envParams = new Map();
     envParams.set("{MYSQL_PSSW}", process.env["MYSQL_PSSW"]);
@@ -39,7 +38,25 @@ exports.handler = async argv => {
     envParams.set("{TOKEN}", process.env["TOKEN"]);
     envParams.set("{VOLUME}", process.env["VOLUME"]);
 
-    await runSetup(doc.setup)
+    // check if the iTrust2-10.jar exists
+    let iTrust2 = path.join(__dirname, '../iTrust2-10.jar');
+    if(!fs.existsSync(iTrust2)){
+        let isBuild = await askBuild();
+        if(isBuild === 'Y'){
+            console.log(chalk.green("Start to build the project"));
+            let buildParams = {
+                'job_name': 'itrust-build',
+                'buildFile_path': buildFile_path,
+                'processor': processor
+            }
+            await build.handler(buildParams);
+        }else{
+            console.log(chalk.yellow(`Please run 'node index.js build itrust-build ${buildFile_path}' before the deployment`));
+            return
+        }
+    }
+
+    await runSetup(doc.setup, sshCmd, envParams)
     console.log( chalk.yellowBright( "\nINSTALLATION COMPLETE! TRIGGERING JOB EXECUTION" ))
     let currentJob = null
 
@@ -53,14 +70,41 @@ exports.handler = async argv => {
     let cleanup_steps = currentJob.cleanup;
 
     try {
-        await runBuildSteps(steps);
+        await runDeploySteps(steps, sshCmd, envParams, inventory);
     } catch (error) {
         console.log( chalk.yellowBright (`Error ${error}`))
     }
-    cleanUp(cleanup_steps);
-    
+    cleanUp(cleanup_steps, sshCmd, envParams);
 
-    function cleanUp(cleanup_steps) {
+    function askBuild() {
+        const rl = readline.createInterface({
+            input: process.stdin,
+            output: process.stdout,
+        });
+    
+        return new Promise(resolve => rl.question("Application has not been built yet, do you want to build and deploy? (Y/n)", ans => {
+            rl.close();
+            resolve(ans);
+        }))
+    }
+
+    function readInventory(inventoryPath){
+        let file = fs.readFileSync(inventoryPath, 'utf8');
+        let lines = file.replaceAll("\"","").split("\n");
+        let inventory={};
+        for(let i in lines){
+            let line = lines[i];
+            let params = line.split(/\s*=\s*/);
+            inventory[params[0]] = params[1];
+        }
+        return inventory;
+    }
+
+    function sshConfig(inventory) {
+        return `ssh -q -i "${inventory.IDENTIFY_FILE}" -p ${inventory.PORT} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${inventory.USER}@${inventory.HOST}`;
+    }
+
+    function cleanUp(cleanup_steps, sshCmd, envParams) {
         console.log( chalk.yellowBright("\n\nCLEAN UP PROCESS") );
         for (let step in cleanup_steps){
             console.log( chalk.green(cleanup_steps[step].name) );
@@ -68,7 +112,7 @@ exports.handler = async argv => {
         }
     }
 
-    async function runSetup(setup_steps) {
+    async function runSetup(setup_steps, sshCmd, envParams) {
         for(let i in setup_steps){
             let task = setup_steps[i];
             console.log(chalk.green(task.name));
@@ -76,62 +120,16 @@ exports.handler = async argv => {
         }
     }
 
-    async function runBuildSteps(steps) {
+    async function runDeploySteps(steps, sshCmd, envParams, inventory) {
         for (let step in steps){
             console.log( chalk.green(steps[step].name) );
-            await provider.ssh(steps[step].cmd, sshCmd, envParams)
-        }
-    }
-
-    async function testharness(mutation, microserviceDir, oriFile, envParams) {
-        let targetUrls = mutation.snapshots
-        let mutCnt = 0;
-        let mutFailCnt = 0;
-        await provider.ssh(`cd ${microserviceDir} && pm2 start index.js && cd`, sshCmd);
-        await create_compare_screenshot(targetUrls, 'original', envParams)
-        for (let i=1; i<=mutation.iterations; i++) {
-            await runMutation(oriFile, mutation);
-            await provider.ssh(`cd ${microserviceDir} && pm2 kill && pm2 start index.js && cd`, sshCmd);
-            await create_compare_screenshot(targetUrls, i, envParams).catch( (error) => {
-                mutFailCnt++;
-                console.log( chalk.redBright(`\nERROR: ${error}`) );
-            });
-            mutCnt++;
-        }
-        console.log( chalk.yellowBright(`THE MUTATION COVERAGE IS: ${mutFailCnt}/${mutCnt}`));
-    }
-
-    async function packageInstallation(url) {
-        await provider.ssh(`git clone ${url}`, sshCmd);
-        dir_name = url.split("/").pop()
-        await provider.ssh(`cd ${dir_name} && npm install && cd`, sshCmd);
-    }
-
-    async function compare_screenshot(file1, file2) {
-        resemble(file1).compareTo(file2).onComplete( function(comparisonData) {
-            if (comparisonData.rawMisMatchPercentage > 0) {
-                console.log(chalk.redBright(`The mutation file ${file2.split("/").pop()} is ${comparisonData.rawMisMatchPercentage*100}% different compared to the original page.`));
-                throw "Image is not matching baseline image"
-            }else{
-                console.log(chalk.redBright(`The mutation file ${file2.split("/").pop()} is the same as the original page.`));
+            if(steps[step].cmd){
+                await provider.ssh(steps[step].cmd, sshCmd, envParams)
+            }else if(steps[step].scp){
+                let params = steps[step].scp.params;
+                await provider.scp(params.src, params.dest, inventory)
             }
-        });
-    }
-
-    async function create_compare_screenshot(targetUrls, picFileNameSuffix, envParams) {
-        for(let j in targetUrls){
-            let url = targetUrls[j];
-            let picFileName = `screenshots/${url.split("/").pop()}-${picFileNameSuffix}`;
-            await provider.ssh(`node ASTRewrite/index.js screenshot ${url} {VOLUME}/${picFileName}`, sshCmd, envParams);
-            if (picFileNameSuffix != "original") {
-                originalPicFileName = picFileName.replace(`-${picFileNameSuffix}`, '-original')
-                await compare_screenshot(`${originalPicFileName}.png`, `${picFileName}.png`)
-            }
+            
         }
-    }
-    
-    async function runMutation(oriFile, mutation) {
-        jsFile = mutation.jsfile
-        await provider.ssh(`node ASTRewrite/index.js mutate ${oriFile} ${jsFile}`, sshCmd, envParams)
     }
 };

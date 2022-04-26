@@ -49,6 +49,10 @@ jobs:
         cmd: sed -i 's/password:/password:\ {MYSQL_PSSW}/' iTrust2-v10/iTrust2/src/main/resources/application.yml
       - name: Run iTrust2
         cmd: cd iTrust2-v10/iTrust2 && mvn --batch-mode --update-snapshots clean test
+      - name: package iTrust2
+        cmd: cd iTrust2-v10/iTrust2 && mvn clean package -Dmaven.test.skip=true
+      - name: move iTrust2 jar file
+        cmd: cp iTrust2-v10/iTrust2/target/iTrust2-10.jar /bakerx/
     cleanup:
       - name: remove iTrust2-v10 repo
         cmd: rm -rf iTrust2-v10
@@ -80,22 +84,15 @@ jobs:
         cmd: rm -rf checkbox.io-micro-preview
   - name: deploy-iTrusts
     steps:
+      - name: move the project to the remote server
+        scp:
+          params:
+            src: ./iTrust2-10.jar
+            dest: ~/iTrust2-10.jar
       - name: shutdown the server 
-        cmd: sudo killall -q 'java'
-      - name: clone latest version of iTrust2
-        cmd: git clone https://{GIT_USER}:{TOKEN}@github.ncsu.edu/engr-csc326-staff/iTrust2-v10.git
-      - name: copy application.yml.template to application.yml
-        cmd: cp iTrust2-v10/iTrust2/src/main/resources/application.yml.template iTrust2-v10/iTrust2/src/main/resources/application.yml
-      - name: update password in application.yml
-        cmd: sed -i 's/password:/password:\ {MYSQL_PSSW}/' iTrust2-v10/iTrust2/src/main/resources/application.yml
-      - name: pacakge iTrust2-v10
-        cmd: cd iTrust2-v10/iTrust2 && mvn clean package -Dmaven.test.skip=true
-      - name: cp the jar file
-        cmd: cp iTrust2-v10/iTrust2/target/iTrust2-10.jar ~/
+        cmd: sudo killall -q 'java' || true
       - name: start the iTrust2 server 1
-        cmd: nohup java -jar iTrust2-10.jar --server.port=8080  &> /dev/null &
+        cmd: nohup java -jar ~/iTrust2-10.jar --server.port=8080  &> /bakerx/server1.log &
       - name: start the iTrust2 server 2
-        cmd: nohup java -jar iTrust2-10.jar --server.port=8081  &> /dev/null &
+        cmd: nohup java -jar ~/iTrust2-10.jar --server.port=8081  &> /bakerx/server2.log  &
     cleanup:
-      - name: remove iTrust2-v10 repo
-        cmd: rm -rf iTrust2-v10
