@@ -31,8 +31,6 @@ setup:
     cmd: sudo npm install pm2 -g
   - name: install yargs for npm
     cmd: npm install yargs
-  - name: install browser for puppeteer
-    cmd: sudo apt install -y chromium-browser chromium-bsu -qq
   - name: install canvas dependencies
     cmd: sudo apt install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
   - name: stop apt-daily timer to look for updates
@@ -52,12 +50,14 @@ jobs:
       - name: package iTrust2
         cmd: cd iTrust2-v10/iTrust2 && mvn clean package -Dmaven.test.skip=true
       - name: move iTrust2 jar file
-        cmd: cp iTrust2-v10/iTrust2/target/iTrust2-10.jar /bakerx/
+        cmd: cp iTrust2-v10/iTrust2/target/iTrust2-10.jar {VOLUME}/
     cleanup:
       - name: remove iTrust2-v10 repo
         cmd: rm -rf iTrust2-v10
   - name: mutation-coverage
     steps:
+      - name: install browser for puppeteer
+        cmd: sudo apt install -y chromium-browser chromium-bsu -qq
       - name: remove screenshot folder
         cmd: rm -rf {VOLUME}/screenshots
       - name: make directory for screenshotsbaker
@@ -92,7 +92,7 @@ jobs:
       - name: shutdown the server 
         cmd: sudo killall -q 'java' || true
       - name: start the iTrust2 server 1
-        cmd: nohup java -jar ~/iTrust2-10.jar --server.port=8080  &> /bakerx/server1.log &
+        cmd: nohup java -jar ~/iTrust2-10.jar --server.port=8080  &> {VOLUME}/server1.log &
       - name: start the iTrust2 server 2
-        cmd: nohup java -jar ~/iTrust2-10.jar --server.port=8081  &> /bakerx/server2.log  &
+        cmd: nohup java -jar ~/iTrust2-10.jar --server.port=8081  &> {VOLUME}/server2.log  &
     cleanup:
