@@ -6,28 +6,40 @@
 - run `npm install` and `npm link`
 - use env template to create .env `cp env.template .env`
 - update the values for MYSQL Password, GitHub Username, GitHub Token.
-- for Intel/AMD64 users, checking if you have at least `4G memory` for the virtual machine.
+- checking if you have at least `5GB memory` for the virtual machine.
 - initiate the pipeline `pipeline init` or `node index.js init`
 - build the pipeline `pipeline build <job-name> <path to build.yml>` or `node index.js build <job-name> <path to build.yml>`
+- set up prod environment `pipeline prod up` or `node index.js prod up`
+- deploy pipeline `pipeline deploy <path to inventory> <job-name> <path to build.yml>` or `node index.js deploy <path to inventory> <job-name> <path to build.yml>`
 
-** VM name is set as `M1`
+** VM name is set as `M1`, `M2`, `M3` for respective milestones
 
-** New User created for MySQL is `admin`
+** VM information is stored at DEVOPS-17/config.txt . It is created after execution of `init`.
 
-** [job-name] for running iTrust2 is itrust-build
+** Droplets information is stored at DEVOPS-17/inventory.txt. It is created after execution of `prod up`.
 
-** VM information is stored at DEVOPS-17/config.txt after `init` is run
+* Values of [job-name] are as follows:
+  * `itrust-build` for running iTrust2
+  * `mutation-coverage` for running mutation coverage
+  * `deploy-iTrusts` for deploying iTrust2
+
 
 ## Description for `.env` file
 In the .env file, we need to set up the following variables to run the building jobs:
 ```
-MYSQL_PSSW='' 
-GIT_USER=''
-TOKEN=''
+MYSQL_PSSW= 
+GIT_USER=
+TOKEN=
+VOLUME=
+PROVISION_TOKEN=
+PROVISION_PRIVATE_PATH=
 ```
-- MYSQL_PSSW: the password of the 'admin' user for mysql
+- MYSQL_PSSW: the password of the 'root' user for mysql
 - GIT_USER: a git account that can access the project on https://github.ncsu.edu/.
 - TOKEN: the token created by your git account
+- VOLUME: the shared volume value in case of bakerx is `\bakerx`, whereas in case of basicvm is `shared/cwd`
+- PROVISION_TOKEN: token for digital ocean account
+- PROVISION_PRIVATE_PATH: the path of public ssh key on the local machine, for the key added to digital ocean.
 
 ## Process Involved in Setting Up the Pipeline
 - Used the learning from class and homework assignments on:
@@ -69,6 +81,8 @@ TOKEN=''
   - **Solution**: granted the new user with all privileges to the MySQL.
 - Default buffer size of child_process is 200KB whereas output `mvn test` command was almost 1.9 MB. So, entire stdout could not be displayed.
   - **Solution**: explicitly updated the max buffer size of child_process to 2 MB. 
+- chromium installation getting stuck on VM.Upgraded the memory size to 5MB.
+  - **Solution**: Upgraded the memory size to 5MB. 
 
 ## Demo Screencast for M1
 ### Screencast for Intel
@@ -85,6 +99,8 @@ This checkpoint report includes the tasks we have completed along with the team 
 ### Screencast for M1
 [![Screencast for M1](./static/M1_Screencasts_Thumbnail.png)](https://youtu.be/vUVsejQrMa0)
 
+## [Milestone 2 Report](https://github.ncsu.edu/CSC-DevOps-S22/DEVOPS-17/blob/main/MILESTONE-M2.md)
+This milestone report includes the tasks we have completed along with the team contributions, the issues we have faced while implementing or completing tasks along with their resolutions and the learnings got from them. There will also be a screenshot of the Github Project Board at the time this Milestone document was documented.
 
 ### [Link for 1000 Iteration Images](https://drive.google.com/drive/folders/1uM1DVPdqmU7GFLpYvD0snBUEXzjhc3zK?usp=sharing)
 
