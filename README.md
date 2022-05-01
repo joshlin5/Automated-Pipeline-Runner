@@ -23,7 +23,7 @@
   * `mutation-coverage` for running mutation coverage
   * `deploy-iTrusts` for deploying iTrust2
 
-
+** We use the Blue-green deployment as out deployment strategy.
 ## Description for `.env` file
 In the .env file, we need to set up the following variables to run the building jobs:
 ```
@@ -39,7 +39,7 @@ PROVISION_PRIVATE_PATH=
 - TOKEN: the token created by your git account
 - VOLUME: the shared volume value in case of bakerx is `\bakerx`, whereas in case of basicvm is `shared/cwd`
 - PROVISION_TOKEN: token for digital ocean account
-- PROVISION_PRIVATE_PATH: the path of public ssh key on the local machine, for the key added to digital ocean.
+- PROVISION_PRIVATE_PATH: the path of private ssh key on the local machine, for the key added to digital ocean.
 
 ## Process Involved in Setting Up the Pipeline
 - Used the learning from class and homework assignments on:
@@ -105,3 +105,8 @@ This milestone report includes the tasks we have completed along with the team c
 ### [Link for 1000 Iteration Images](https://drive.google.com/drive/folders/1uM1DVPdqmU7GFLpYvD0snBUEXzjhc3zK?usp=sharing)
 
 ### [Link for 1000 Iteration Mutation Coverage Report](report.txt)
+
+
+## Demo Screencast for M3
+### Screencast for Intel
+[![Intel Demo](./static/Intel_M2_demo.png)](https://drive.google.com/file/d/1o2w0zNTCrzZYrTynKwT823wmWi3IahaS/view?usp=sharing"Intel Demo")<br/>
