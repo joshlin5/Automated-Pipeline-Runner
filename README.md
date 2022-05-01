@@ -37,7 +37,7 @@ PROVISION_PRIVATE_PATH=
 - MYSQL_PSSW: the password of the 'root' user for mysql
 - GIT_USER: a git account that can access the project on https://github.ncsu.edu/.
 - TOKEN: the token created by your git account
-- VOLUME: the shared volume value in case of bakerx is `\bakerx`, whereas in case of basicvm is `shared/cwd`
+- VOLUME: the shared volume value in case of bakerx is `/bakerx`, whereas in case of basicvm is `shared/cwd`
 - PROVISION_TOKEN: token for digital ocean account
 - PROVISION_PRIVATE_PATH: the path of private ssh key on the local machine, for the key added to digital ocean.
 
@@ -84,29 +84,11 @@ PROVISION_PRIVATE_PATH=
 - chromium installation getting stuck on VM.Upgraded the memory size to 5MB.
   - **Solution**: Upgraded the memory size to 5MB. 
 
-## Demo Screencast for M1
-### Screencast for Intel
-[![Intel Demo](./static/Intel_demo.png)](https://drive.google.com/file/d/1RGOJzXG19odPBtmXrGc9IQB3BXlwUIaD/view?usp=sharing "Intel Demo")<br/>
-### Screencast for M1
-[![Screencast for M1](./static/M1_Screencasts_Thumbnail.png)](https://youtu.be/35rETvH5RFE)
-
-## [Checkpoint Report](https://github.ncsu.edu/CSC-DevOps-S22/DEVOPS-17/blob/main/CHECKPOINT-M1.md)
-This checkpoint report includes the tasks we have completed along with the team contributions, the issues we have faced while implementing or completing tasks, and what work remains after this checkpoint. There will also be a screenshot of the Github Project at the time this Checkpoint document was created.
-
-## Demo Screencast for M2
-### Screencast for Intel
-[![Intel Demo](./static/Intel_M2_demo.png)](https://drive.google.com/file/d/1ZukNw2L7_WN-hRPG59JYtsD6k8TpY4xr/view?usp=sharing "Intel Demo")<br/>
-### Screencast for M1
-[![Screencast for M1](./static/M1_Screencasts_Thumbnail.png)](https://youtu.be/vUVsejQrMa0)
+## [Checkpoint M1 Report](https://github.ncsu.edu/CSC-DevOps-S22/DEVOPS-17/blob/main/CHECKPOINT-M1.md)
+This checkpoint report includes the tasks we have completed along with the team contributions, the issues we have faced while implementing or completing tasks, and what work remains after this checkpoint. There will also be a screenshot of the Github Project at the time this Checkpoint document was created and the Screencasts for this checkpoint.
 
 ## [Milestone 2 Report](https://github.ncsu.edu/CSC-DevOps-S22/DEVOPS-17/blob/main/MILESTONE-M2.md)
-This milestone report includes the tasks we have completed along with the team contributions, the issues we have faced while implementing or completing tasks along with their resolutions and the learnings got from them. There will also be a screenshot of the Github Project Board at the time this Milestone document was documented.
+This milestone report includes the tasks we have completed along with the team contributions, the issues we have faced while implementing or completing tasks along with their resolutions and the learnings got from them. There will also be a screenshot of the Github Project Board at the time this Milestone document was documented and the screencast as a demo for this milestone. The link for snapshots of 1000 iteration of mutation is also provided there.
 
-### [Link for 1000 Iteration Images](https://drive.google.com/drive/folders/1uM1DVPdqmU7GFLpYvD0snBUEXzjhc3zK?usp=sharing)
-
-### [Link for 1000 Iteration Mutation Coverage Report](report.txt)
-
-
-## Demo Screencast for M3
-### Screencast for Intel
-[![Intel Demo](./static/Intel_M2_demo.png)](https://drive.google.com/file/d/1o2w0zNTCrzZYrTynKwT823wmWi3IahaS/view?usp=sharing"Intel Demo")<br/>
+## [Milestone 3 Report](https://github.ncsu.edu/CSC-DevOps-S22/DEVOPS-17/blob/main/MILESTONE-M3.md)
+This milestone report includes the tasks we have completed along with the team contributions, the issues we have faced while implementing or completing tasks along with their resolutions and the learnings got from them. There will also be a screenshot of the Github Project Board at the time this Milestone document was documented and the screencast as a demo for this milestone.

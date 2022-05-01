@@ -17,3 +17,9 @@
   
 ## GitHub Project Screenshot
 ![GitHub Project Screenshot](/resources/Checkpoint%20Github%20Project%20Screenshot.png)
+
+## Demo Screencast for M1
+### Screencast for Intel
+[![Intel Demo](./static/Intel_demo.png)](https://drive.google.com/file/d/1RGOJzXG19odPBtmXrGc9IQB3BXlwUIaD/view?usp=sharing "Intel Demo")<br/>
+### Screencast for M1
+[![Screencast for M1](./static/M1_Screencasts_Thumbnail.png)](https://youtu.be/35rETvH5RFE)

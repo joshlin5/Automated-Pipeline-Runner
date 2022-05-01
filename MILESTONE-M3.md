@@ -19,4 +19,10 @@ Inventory file is craeted at the root location of the repository.
 - jar file creation
 
 ### Project Board:
-![GitHub Project Board Screenshot]()
+![GitHub Project Board Screenshot](/resources/M3-Project-Board.png)
+
+### Demo Screencast for M3
+#### Screencast for Intel
+[![Intel Demo](./static/Intel_M2_demo.png)](https://drive.google.com/file/d/1o2w0zNTCrzZYrTynKwT823wmWi3IahaS/view?usp=sharing "Intel Demo")<br/>
+#### Screencast for M1
+[![Screencast for M1]]()
