@@ -8,4 +8,5 @@ config-srv
 config-srv.pub
 screenshots/
 config.txt
+inventory.txt
 iTrust2-10.jar

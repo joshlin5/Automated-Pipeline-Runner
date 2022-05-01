@@ -31,8 +31,6 @@ setup:
     cmd: sudo npm install pm2 -g
   - name: install yargs for npm
     cmd: npm install yargs
-  - name: install canvas dependencies
-    cmd: sudo apt install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
   - name: stop apt-daily timer to look for updates
     cmd: sudo systemctl stop apt-daily.timer
 
@@ -90,9 +88,6 @@ jobs:
             src: ./iTrust2-10.jar
             dest: ~/iTrust2-10.jar
       - name: shutdown the server 
-        cmd: sudo killall -q 'java' || true
+        cmd: sudo killall -9 'java' || true
       - name: start the iTrust2 server 1
-        cmd: nohup java -jar ~/iTrust2-10.jar --server.port=8080  &> {VOLUME}/server1.log &
-      - name: start the iTrust2 server 2
-        cmd: nohup java -jar ~/iTrust2-10.jar --server.port=8081  &> {VOLUME}/server2.log  &
-    cleanup:
+        cmd: nohup java -jar ~/iTrust2-10.jar --server.port=8080  &> server.log &

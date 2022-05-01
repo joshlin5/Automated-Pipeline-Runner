@@ -1,4 +1,0 @@
-HOST="127.0.0.1"
-PORT="2005"
-IDENTIFY_FILE="/Users/hungchaoting/.bakerx/insecure_private_key"
-USER="vagrant"
