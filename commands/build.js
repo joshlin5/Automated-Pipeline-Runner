@@ -92,6 +92,7 @@ exports.handler = async argv => {
     async function runBuildSteps(steps) {
         for (let step in steps){
             console.log( chalk.green(steps[step].name) );
+            console.log( chalk.green(steps[step].cmd) );
             await provider.ssh(steps[step].cmd, sshCmd, envParams)
         }
     }

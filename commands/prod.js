@@ -6,6 +6,7 @@ const path = require('path');
 const vmProvider = require("../lib/vmProvider");
 const bakerxProvider = require("../lib/bakerxProvider");
 const { env } = require('process');
+
 exports.command = 'prod up';
 exports.desc = 'Create a production on the DigitalOcean';
 exports.builder = yargs => {
@@ -59,6 +60,12 @@ exports.handler = async argv => {
                 await deleteDroplet(targets[i].id, headers);
             }
         }
+		// Adding Host IP address
+		fs.writeFile('../inventory.txt', "HOST=`127.0.0.1`" + "\n" + "PORT=`2005`" + "\n", (err) => {
+          
+            // In case of a error throw err.
+            if (err) throw err;
+        })
     }
 
     async function deleteDroplet(id, headers)
@@ -97,7 +104,7 @@ exports.handler = async argv => {
             sshIds.push(element.id);
 		});
 		console.log("sshs: " + sshIds);
-        fs.writeFile('../inventory.txt', "sshIds: " + sshIds + "\n", (err) => {
+        fs.appendFile('../inventory.txt', "sshIds: " + sshIds + "\n", (err) => {
           
             // In case of a error throw err.
             if (err) throw err;
@@ -150,7 +157,7 @@ exports.handler = async argv => {
                 "connectionData :\n" + 
                   " dropletID: " + dropletId + "\n";
 
-            fs.writeFile('../inventory.txt', inventory, (err) => {
+            fs.appendFile('../inventory.txt', inventory, (err) => {
           
                 // In case of a error throw err.
                 if (err) throw err;

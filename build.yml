@@ -6,7 +6,7 @@ setup:
   - name: remove flash-kernel
     cmd: sudo apt remove -y flash-kernel && sudo apt -y autoremove
   - name: install java 11
-    cmd:  sudo apt install -y openjdk-11-jre-headless -qq
+    cmd: sudo apt install -y openjdk-11-jre-headless -qq
   - name: install debconf-utils
     cmd: sudo apt install -y debconf-utils -qq
   - name: set DEBIAN_FRONTEND as "noninteractive"
