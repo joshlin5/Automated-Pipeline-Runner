@@ -1,5 +1,0 @@
-sshIds: 34313498
-dropletID: 296791431
-dropletName: jiln36MacBook-Pro-4.lan
-IPV4 IP Address: 178.128.151.115
-IPV4 IP Address: 10.116.0.2

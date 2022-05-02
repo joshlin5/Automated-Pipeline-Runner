@@ -2,19 +2,20 @@ require('dotenv').config()
 const chalk = require('chalk');
 const fs = require('fs');
 const path = require('path');
-const resemble = require("resemblejs");
 const readline = require("readline")
 const yaml = require('js-yaml');
-const build = require('./build.js');
-const vmProvider = require("../lib/vmProvider");
+const build = require('./build');
 const bakerxProvider = require("../lib/bakerxProvider");
+const vmProvider = require("../lib/vmProvider");
+const ymlExec = require('../lib/yamlExecutor');
+const {serverNames, run} = require("../lib/blueGreenStrategy");
+const { env } = require('process');
 exports.command = 'deploy <inventory_path> <job_name> <buildFile_path>';
 exports.desc = 'Trigger a deploy job, running steps outlined by build.yml, wait for output, and print build log.';
 exports.builder = yargs => {
     yargs.options({
     });
 };
-
 
 exports.handler = async argv => {
     const { inventory_path, job_name, buildFile_path, processor } = argv;
@@ -23,9 +24,8 @@ exports.handler = async argv => {
     console.log(chalk.green(`Using the yml file: ${buildFile_path}`));
     console.log(chalk.green(`Using the inventory file: ${inventory_path}`));
     let doc = yaml.load(fs.readFileSync(buildFile_path, 'utf8'));
-    let inventory = readInventory(inventory_path);
-    let sshCmd = sshConfig(inventory);
-    
+    readInventory(inventory_path);
+
     let provider = null;
     if (processor == "Intel/Amd64") {
         provider = bakerxProvider
@@ -33,31 +33,30 @@ exports.handler = async argv => {
         provider = vmProvider
     }
     let envParams = new Map();
-    envParams.set("{MYSQL_PSSW}", process.env["MYSQL_PSSW"]);
-    envParams.set("{GIT_USER}", process.env["GIT_USER"]);
-    envParams.set("{TOKEN}", process.env["TOKEN"]);
-    envParams.set("{VOLUME}", process.env["VOLUME"]);
+    envParams.set("{MYSQL_PSSW}", env["MYSQL_PSSW"]);
+    envParams.set("{GIT_USER}", env["GIT_USER"]);
+    envParams.set("{TOKEN}", env["TOKEN"]);
+    envParams.set("{VOLUME}", env["VOLUME"]);
 
     // check if the iTrust2-10.jar exists
     let iTrust2 = path.join(__dirname, '../iTrust2-10.jar');
     if(!fs.existsSync(iTrust2)){
-        let isBuild = await askBuild();
-        if(isBuild === 'Y'){
+        let isBuild = await askBuild("Application has not been built yet, do you want to build and deploy? (Y/n)");
+        let buildJob = await askBuild("Give the job name to build")
+        if(isBuild.toLowerCase() === 'y'){
             console.log(chalk.green("Start to build the project"));
             let buildParams = {
-                'job_name': 'itrust-build',
+                'job_name': buildJob,
                 'buildFile_path': buildFile_path,
                 'processor': processor
             }
             await build.handler(buildParams);
         }else{
-            console.log(chalk.yellow(`Please run 'node index.js build itrust-build ${buildFile_path}' before the deployment`));
+            console.log(chalk.yellow(`Please run 'node index.js build ${buildJob} ${buildFile_path}' before the deployment`));
             return
         }
     }
 
-    await runSetup(doc.setup, sshCmd, envParams)
-    console.log( chalk.yellowBright( "\nINSTALLATION COMPLETE! TRIGGERING JOB EXECUTION" ))
     let currentJob = null
 
     for(let job in doc.jobs){ 
@@ -67,22 +66,33 @@ exports.handler = async argv => {
     }
 
     let steps = currentJob.steps;
-    let cleanup_steps = currentJob.cleanup;
+    let cleanup_steps = currentJob.cleanup || [];
 
-    try {
-        await runDeploySteps(steps, sshCmd, envParams, inventory);
-    } catch (error) {
-        console.log( chalk.yellowBright (`Error ${error}`))
+    for (let server in serverNames) {
+        let sshCmd = sshConfig(serverNames[server]);
+
+        ymlExec.initialize(provider, sshCmd, envParams);
+
+        await ymlExec.runSetup(doc.setup)
+        console.log( chalk.yellowBright( `\nINSTALLATION COMPLETE ON ${server} server` ))
+        try {
+            console.log( chalk.yellowBright( `\nRUN DEPLOY STEPS ON ${server} server` ))
+            await ymlExec.runDeploySteps(steps, serverNames[server]);
+        } catch (error) {
+            console.log( chalk.red (`Error ${error}`))
+        }
+        ymlExec.cleanUp(cleanup_steps);
     }
-    cleanUp(cleanup_steps, sshCmd, envParams);
 
-    function askBuild() {
+    await run()
+
+    function askBuild(ques) {
         const rl = readline.createInterface({
             input: process.stdin,
             output: process.stdout,
         });
     
-        return new Promise(resolve => rl.question("Application has not been built yet, do you want to build and deploy? (Y/n)", ans => {
+        return new Promise(resolve => rl.question(ques, ans => {
             rl.close();
             resolve(ans);
         }))
@@ -90,46 +100,20 @@ exports.handler = async argv => {
 
     function readInventory(inventoryPath){
         let file = fs.readFileSync(inventoryPath, 'utf8');
-        let lines = file.replaceAll("\"","").split("\n");
-        let inventory={};
+        let lines = file.replaceAll("\"","").trim().split("\n");
+        let serverName = "";
         for(let i in lines){
             let line = lines[i];
-            let params = line.split(/\s*=\s*/);
-            inventory[params[0]] = params[1];
+            let params = line.split(/\s* \s*/);
+            if (!params[0].startsWith("\t")){
+                serverName = params[1];
+            } else {
+                serverNames[serverName][params[0].trim()] = params[1];
+            }
         }
-        return inventory;
     }
 
     function sshConfig(inventory) {
-        return `ssh -q -i "${inventory.IDENTIFY_FILE}" -p ${inventory.PORT} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${inventory.USER}@${inventory.HOST}`;
-    }
-
-    function cleanUp(cleanup_steps, sshCmd, envParams) {
-        console.log( chalk.yellowBright("\n\nCLEAN UP PROCESS") );
-        for (let step in cleanup_steps){
-            console.log( chalk.green(cleanup_steps[step].name) );
-            provider.ssh(cleanup_steps[step].cmd, sshCmd, envParams);
-        }
-    }
-
-    async function runSetup(setup_steps, sshCmd, envParams) {
-        for(let i in setup_steps){
-            let task = setup_steps[i];
-            console.log(chalk.green(task.name));
-            await provider.ssh(task.cmd, sshCmd, envParams)
-        }
-    }
-
-    async function runDeploySteps(steps, sshCmd, envParams, inventory) {
-        for (let step in steps){
-            console.log( chalk.green(steps[step].name) );
-            if(steps[step].cmd){
-                await provider.ssh(steps[step].cmd, sshCmd, envParams)
-            }else if(steps[step].scp){
-                let params = steps[step].scp.params;
-                await provider.scp(params.src, params.dest, inventory)
-            }
-            
-        }
+        return `ssh -i ${env["PROVISION_PRIVATE_PATH"]} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${inventory.USER}@${inventory.HOSTIP}`
     }
 };
