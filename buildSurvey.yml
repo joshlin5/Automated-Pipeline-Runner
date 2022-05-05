@@ -1,0 +1,84 @@
+setup: 
+  - name: synchronize system time
+    cmd: sudo systemctl restart systemd-timesyncd.service
+  - name: update apt
+    cmd: sudo apt update
+  # - name: remove flash-kernel
+  #   cmd: sudo apt remove -y flash-kernel && sudo apt -y autoremove
+  - name: install git
+    cmd: sudo apt install -y git -qq
+  - name: get dependencies for nodejs
+    cmd: curl -fsSL https://deb.nodesource.com/setup_16.x | sudo bash -
+  - name: install nodejs and npm
+    cmd: sudo apt install -y nodejs -qq
+  - name: stop apt-daily timer to look for updates
+    cmd: sudo systemctl stop apt-daily.timer
+
+jobs:
+  - name: survey-build
+    steps:
+      - name: clone survey
+        cmd: git clone https://github.com/surveyjs/surveyjs_react_quickstart.git
+      - name: install dependencies
+        cmd: cd surveyjs_react_quickstart && npm i
+    cleanup:
+      - name: remove microservice repo
+        cmd: rm -rf surveyjs_react_quickstart
+
+  - name: mutationSurvey
+    steps:
+      - name: install uuid for pm2
+        cmd: sudo npm install uuid@latest -g
+      - name: install pm2
+        cmd: sudo npm install pm2 -g
+      - name: install browser for puppeteer
+        cmd: sudo apt install -y chromium-browser chromium-bsu -qq
+      - name: install canvas dependencies
+        cmd: sudo apt install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
+      - name: install yarn
+        cmd: sudo npm install --global yarn
+      - name: remove screenshot folder
+        cmd: rm -rf {VOLUME}/screenshots
+      - name: make directory for screenshotsbaker
+        cmd: mkdir {VOLUME}/screenshots
+      - name: move Testharness to ~/
+        cmd: cp -r {VOLUME}/ASTRewrite ASTRewrite/
+      - name: install node dependencies for Testharness
+        cmd: cd ~/ASTRewrite && npm install && cd
+      - name: install yargs dependencies for Testharness
+        cmd: cd ~/ASTRewrite && npm i yargs && cd
+    mutation:
+      url: https://github.com/surveyjs/surveyjs_react_quickstart
+      jsfile: surveyjs_react_quickstart/src/registerServiceWorker.js
+      iterations: 10
+      snapshots:
+        - http://localhost:3000/
+    cleanup:
+      - name: remove all web from pm2
+        cmd: pm2 kill
+      - name: remove ASTRewrite repo
+        cmd: rm -rf ASTRewrite
+      - name: remove microservice repo
+        cmd: rm -rf surveyjs_react_quickstart
+
+  - name: deploy-Survey
+    steps:
+      - name: clone survey
+        cmd: git clone https://github.com/surveyjs/surveyjs_react_quickstart.git
+      - name: install dependencies
+        cmd: cd surveyjs_react_quickstart && npm i
+      - name: start servery
+        cmd: cd surveyjs_react_quickstart && node --max-old-space-size=1024 $(which npm) start &
+    cleanup:
+
+  - name: deploy-Survey-VM
+    steps:
+      - name: clone survey
+        cmd: git clone https://github.com/surveyjs/surveyjs_react_quickstart.git
+      - name: install dependencies
+        cmd: cd surveyjs_react_quickstart && npm i
+      - name: start servery
+        cmd: cd surveyjs_react_quickstart && npm start &
+    cleanup:
+      - name: remove microservice repo
+        cmd: rm -rf surveyjs_react_quickstart

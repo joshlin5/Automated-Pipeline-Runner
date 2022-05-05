@@ -39,23 +39,23 @@ exports.handler = async argv => {
     envParams.set("{VOLUME}", env["VOLUME"]);
 
     // check if the iTrust2-10.jar exists
-    let iTrust2 = path.join(__dirname, '../iTrust2-10.jar');
-    if(!fs.existsSync(iTrust2)){
-        let isBuild = await askBuild("Application has not been built yet, do you want to build and deploy? (Y/n)");
-        let buildJob = await askBuild("Give the job name to build")
-        if(isBuild.toLowerCase() === 'y'){
-            console.log(chalk.green("Start to build the project"));
-            let buildParams = {
-                'job_name': buildJob,
-                'buildFile_path': buildFile_path,
-                'processor': processor
-            }
-            await build.handler(buildParams);
-        }else{
-            console.log(chalk.yellow(`Please run 'node index.js build ${buildJob} ${buildFile_path}' before the deployment`));
-            return
-        }
-    }
+    // let iTrust2 = path.join(__dirname, '../iTrust2-10.jar');
+    // if(!fs.existsSync(iTrust2)){
+    //     let isBuild = await askBuild("Application has not been built yet, do you want to build and deploy? (Y/n)");
+    //     let buildJob = await askBuild("Give the job name to build")
+    //     if(isBuild.toLowerCase() === 'y'){
+    //         console.log(chalk.green("Start to build the project"));
+    //         let buildParams = {
+    //             'job_name': buildJob,
+    //             'buildFile_path': buildFile_path,
+    //             'processor': processor
+    //         }
+    //         await build.handler(buildParams);
+    //     }else{
+    //         console.log(chalk.yellow(`Please run 'node index.js build ${buildJob} ${buildFile_path}' before the deployment`));
+    //         return
+    //     }
+    // }
 
     let currentJob = null
 

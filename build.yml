@@ -3,8 +3,6 @@ setup:
     cmd: sudo systemctl restart systemd-timesyncd.service
   - name: update apt
     cmd: sudo apt update
-  - name: remove flash-kernel
-    cmd: sudo apt remove -y flash-kernel && sudo apt -y autoremove
   - name: install java 11
     cmd: sudo apt install -y openjdk-11-jre-headless -qq
   - name: install debconf-utils

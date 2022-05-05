@@ -18,5 +18,5 @@ exports.handler = async argv => {
     console.log(chalk.green("Preparing computing environment..."));
     let provider = processor == "Arm64" ? vmProvider : bakerxProvider;
     await provider.delete(vm_name);
-    await provider.run();
+    await provider.run(vm_name);
 };

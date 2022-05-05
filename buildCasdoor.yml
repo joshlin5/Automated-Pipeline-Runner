@@ -1,0 +1,118 @@
+setup: 
+  # - name: synchronize system time
+  #   cmd: sudo systemctl restart systemd-timesyncd.service
+  # - name: update apt
+  #   cmd: sudo apt update
+  # - name: install java 11
+  #   cmd: sudo apt install -y openjdk-11-jre-headless -qq
+  # - name: install debconf-utils
+  #   cmd: sudo apt install -y debconf-utils -qq
+  # - name: set DEBIAN_FRONTEND as "noninteractive"
+  #   cmd: export DEBIAN_FRONTEND="noninteractive"
+  # - name: set mysql root password
+  #   cmd: echo "mysql-server mysql-server/root_password password {MYSQL_PSSW}" | sudo debconf-set-selections
+  # - name: set mysql root password again
+  #   cmd: echo "mysql-server mysql-server/root_password_again password {MYSQL_PSSW}" | sudo debconf-set-selections
+  # - name: install mysql 8
+  #   cmd: sudo apt install -y mysql-server -qq
+  # - name: install maven
+  #   cmd: sudo apt install -y maven -qq
+  # - name: install git
+  #   cmd: sudo apt install -y git -qq
+  # - name: get dependencies for nodejs
+  #   cmd: curl -fsSL https://deb.nodesource.com/setup_16.x | sudo bash -
+  # - name: install nodejs and npm
+  #   cmd: sudo apt install -y nodejs -qq
+  # - name: install uuid for pm2
+  #   cmd: sudo npm install uuid@latest -g
+  # - name: instal pm2
+  #   cmd: sudo npm install pm2 -g
+  # - name: install yargs for npm
+  #   cmd: npm install yargs
+  # - name: install browser for puppeteer
+  #   cmd: sudo apt install -y chromium-browser chromium-bsu -qq
+  # - name: install canvas dependencies
+  #   cmd: sudo apt install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
+  # - name: find go versions
+  #   cmd: sudo add-apt-repository ppa:longsleep/golang-backports
+  # - name: update
+  #   cmd: sudo apt update
+  # - name: install go
+  #   cmd: sudo apt install golang-go -y
+  # - name: install yarn
+  #   cmd: sudo npm install --global yarn
+  # - name: install pkg
+  #   cmd: sudo npm install -g pkg
+  # - name: stop apt-daily timer to look for updates
+  #   cmd: sudo systemctl stop apt-daily.timer
+
+jobs:
+  - name: casdoor-build
+    steps:
+      - name: clone casdoor
+        cmd: git clone https://github.com/casdoor/casdoor
+      - name: set dataSourceName
+        cmd: sed -i 's/123456/{MYSQL_PSSW}/g' casdoor/conf/app.conf
+      - name: change database creation flag to true
+        cmd: sed -i 's/ false/ true/' casdoor/main.go
+      - name: build front-end files
+        cmd: cd casdoor/web/ && yarn install && CI=false yarn run build
+      - name: build deployment package
+        cmd: cd casdoor && GOOS=linux GOARCH=amd64 go build
+      - name: rename casdoor deployment file to casdoorExe
+        cmd: mv casdoor/casdoor casdoor/casdoorExe
+      - name: move casdoor deployment file
+        cmd: cp casdoor/casdoorExe {VOLUME}/
+      - name: move casdoor front-end files
+        cmd: cp -r casdoor/web/build {VOLUME}/
+    cleanup:
+       - name: remove casdoor repo
+         cmd: rm -rf casdoor
+
+  - name: mutationCasdoor
+    steps:
+      - name: remove screenshot folder
+        cmd: rm -rf {VOLUME}/screenshots
+      - name: make directory for screenshotsbaker
+        cmd: mkdir {VOLUME}/screenshots
+      - name: move Testharness to ~/
+        cmd: cp -r {VOLUME}/ASTRewrite ASTRewrite/
+      - name: install node dependencies for Testharness
+        cmd: cd ~/ASTRewrite && npm install && cd
+    mutation:
+      url: https://github.com/casdoor/casdoor
+      jsfile: casdoor/web/src/backend/UserBackend.js
+      iterations: 10
+      snapshots:
+        - http://localhost:8000/login
+    cleanup:
+      - name: remove all web from pm2
+        cmd: pm2 kill
+      - name: remove ASTRewrite repo
+        cmd: rm -rf ASTRewrite
+      - name: remove microservice repo
+        cmd: rm -rf casdoor
+
+  - name: deploy-Casdoor
+    steps:
+      - name: move casdoor executable to the remote server
+        scp:
+          params:
+            src: ./casdoorExe
+            dest: ~/casdoorExe
+      - name: move front-end build files to the remote server
+        scp:
+          params:
+            src: ./build
+            dest: ~/build
+      - name: clone casdoor repo
+        cmd: git clone https://github.com/casdoor/casdoor
+      - name: move front-end build files
+        cmd: mv build casdoor/web/
+      - name: move casdoor exe
+        cmd: mv casdoorExe casdoor/casdoorExe
+      - name: set dataSourceName
+        cmd: sed -i 's/123456/{MYSQL_PSSW}/g' casdoor/conf/app.conf
+      - name: start the casdoor server
+        cmd: cd casdoor && ./casdoorExe &
+    cleanup:

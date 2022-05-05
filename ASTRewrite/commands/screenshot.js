@@ -37,7 +37,7 @@ async function checkServerReady(url){
             });
             break;
         }catch(error){
-            if(cnt>20){
+            if(cnt>400){
                 await page.close();
                 await browser.close();
                 console.log('Mutation fail to start server!!!');

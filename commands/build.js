@@ -62,6 +62,9 @@ exports.handler = async argv => {
             let fileName = jsFile.split("/").pop();
             let microserviceDir = jsFile.replace(fileName, "");
             let oriFile = `${microserviceDir}${fileName.replace(".js", "-original.js")}`
+            if(fileName.includes(".go")) {
+                let oriFile = `${microserviceDir}${fileName.replace(".go", "-original.go")}`
+            }
             await testAnalysis.packageInstallation(mutation.url);
             console.log(`Creating copy of original file: ${oriFile}`)
             await provider.ssh(`cp ${jsFile} ${oriFile}`, sshCmd);

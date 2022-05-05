@@ -5,7 +5,7 @@
 - change the directory `cd DEVOPS-17`
 - run `npm install` and `npm link`
 - use env template to create .env `cp env.template .env`
-- update the values for MYSQL Password, GitHub Username, GitHub Token.
+- update the values for MYSQL Password, MYSQL Username, GitHub Username, GitHub Token, Volume (shared/cwd for M1 or bakerx for Intel?), Provision Token for Digital Ocean Account, PROVISION_PRIVATE_PATH for Private Key for Digital Ocean Account SSH.
 - checking if you have at least `5GB memory` for the virtual machine.
 - initiate the pipeline `pipeline init` or `node index.js init`
 - build the pipeline `pipeline build <job-name> <path to build.yml>` or `node index.js build <job-name> <path to build.yml>`
@@ -21,6 +21,11 @@
 * Values of [job-name] are as follows:
   * `itrust-build` for running iTrust2
   * `mutation-coverage` for running mutation coverage
+  * `deploy-iTrusts` for deploying iTrust2
+
+* Values of [job-name] for buildSurvey.yml are as follows:
+  * `survey-build` to build surveyjs_react_quickstart
+  * `mutationSurvey` for running mutation coverage on surveyjs_react_quickstart/src/registerServiceWorker.js
   * `deploy-iTrusts` for deploying iTrust2
 
 ** We use the Blue-green deployment as out deployment strategy.
