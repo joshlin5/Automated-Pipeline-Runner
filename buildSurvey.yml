@@ -3,8 +3,6 @@ setup:
     cmd: sudo systemctl restart systemd-timesyncd.service
   - name: update apt
     cmd: sudo apt update
-  # - name: remove flash-kernel
-  #   cmd: sudo apt remove -y flash-kernel && sudo apt -y autoremove
   - name: install git
     cmd: sudo apt install -y git -qq
   - name: get dependencies for nodejs
@@ -17,6 +15,8 @@ setup:
 jobs:
   - name: survey-build
     steps:
+      - name: remove flash-kernel
+        cmd: sudo apt remove -y flash-kernel && sudo apt -y autoremove
       - name: clone survey
         cmd: git clone https://github.com/surveyjs/surveyjs_react_quickstart.git
       - name: install dependencies
